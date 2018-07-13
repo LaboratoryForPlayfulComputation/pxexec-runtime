@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "removeComments": true,
+        "strict": true,
+        "outDir": "built/"
+    }
+}

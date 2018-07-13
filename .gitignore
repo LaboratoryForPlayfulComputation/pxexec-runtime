@@ -1,0 +1,6 @@
+built/
+
+*.swp
+*.swo
+
+.vscode

@@ -4,25 +4,24 @@ namespace _pxexec {
 		handler: () => void
 	}
 
-	var forever_functions : Array<() => void>;
+	var forever_functions: Array<() => void>;
 
-	var events : { [k : string] : EventDescription };
+	var events: { [k: string]: EventDescription };
 
 	export function init() {
 		forever_functions = [];
 		events = {};
 	}
 
-	export function add_forever(func : () => void) : void {
+	export function add_forever(func: () => void) {
 		forever_functions.push(func);
 	}
-	
-	export function register_event(eventId : string, event : EventDescription) {
+
+	export function register_event(eventId: string, event: EventDescription) {
 		events[eventId] = event;
 	}
 
-    export function run() : void {
-
+	export function run() {
 		while (true) {
 			for (let i = 0; i < forever_functions.length; i++) {
 				forever_functions[i]();
@@ -34,7 +33,7 @@ namespace _pxexec {
 				}
 			}
 		}
-    }
+	}
 }
 
 export default _pxexec;

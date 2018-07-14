@@ -1,0 +1,21 @@
+{
+  "name": "pxexec-runtime",
+  "version": "1.0.0",
+  "description": "Runtime support libraries for Node.js PXT execution.",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "wtemple@adriatic.local:git/test-exec"
+  },
+  "author": "Laboratory for Playful Computation",
+  "license": "LGPL-3.0",
+  "devDependencies": {
+    "@types/node": "^10.5.2"
+  }
+}

@@ -2,8 +2,25 @@
     "compilerOptions": {
         "module": "commonjs",
         "moduleResolution": "node",
-        "removeComments": true,
+        "target": "es5",
+        "lib": [
+            "es6"
+        ],
         "strict": true,
-        "outDir": "built/"
-    }
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "alwaysStrict": true,
+        "removeComments": true,
+        "outDir": "built/",
+        "sourceMap": true,
+        "declaration": true,
+        "declarationDir": "decl/",
+    },
+    "exclude": [
+        "node_modules",
+        "built/",
+        "decl/"
+    ]
 }

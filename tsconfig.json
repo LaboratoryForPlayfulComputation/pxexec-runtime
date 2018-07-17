@@ -6,7 +6,6 @@
         "lib": [
             "es6"
         ],
-        "strict": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": true,
@@ -15,8 +14,7 @@
         "removeComments": true,
         "outDir": "built/",
         "sourceMap": true,
-        "declaration": true,
-        "declarationDir": "decl/",
+        "declaration": true
     },
     "exclude": [
         "node_modules",

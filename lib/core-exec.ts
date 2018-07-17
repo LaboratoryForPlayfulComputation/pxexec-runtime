@@ -1,5 +1,5 @@
 namespace _pxexec {
-	interface EventDescription {
+	export interface EventDescription {
 		predicate: () => boolean,
 		handler: () => void
 	}

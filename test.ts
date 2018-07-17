@@ -1,6 +1,5 @@
 
-import grove from './translation';
-import { setTimeout } from 'timers';
+import grove from './lib/grove';
 
 grove.initialize();
 

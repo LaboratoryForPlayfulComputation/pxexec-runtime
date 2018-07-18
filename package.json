@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "wtemple@adriatic.local:git/test-exec"
+    "url": "https://github.com/LaboratoryForPlayfulComputation/pxexec-runtime"
   },
   "author": "Laboratory for Playful Computation",
   "license": "LGPL-3.0",

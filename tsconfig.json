@@ -6,9 +6,9 @@
         "lib": [
             "es6"
         ],
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "noImplicitThis": true,
-        "noUnusedLocals": true,
+        "noUnusedLocals": false,
         "noUnusedParameters": true,
         "alwaysStrict": true,
         "removeComments": true,

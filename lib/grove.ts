@@ -1,4 +1,4 @@
-import GrovePi from './lpc-grove-js';
+import GrovePi from './lpc-grove-js-translation';
 
 //type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital

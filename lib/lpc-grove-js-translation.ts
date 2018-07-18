@@ -1,3 +1,5 @@
+import _g = require('./lpc-grove-js');
+
 import { EventEmitter } from "events";
 
 declare namespace GrovePi {
@@ -224,4 +226,4 @@ declare namespace GrovePi {
     }
 }
 
-export default GrovePi;
+export default _g;

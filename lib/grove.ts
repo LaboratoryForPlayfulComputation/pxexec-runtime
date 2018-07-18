@@ -53,7 +53,10 @@ namespace grove {
     const _typeToConstructor: Map<PortType, (port: number) => Sensor> = new Map([
         [PortType.ULTRASONIC, (port: number) => new UltrasonicDigitalSensor(port)],
         [PortType.BUTTON, (port : number) => new DigitalButtonSensor(port)],
-        [PortType.LED, (port: number) => new LED(port)]
+        [PortType.LED, (port: number) => new LED(port)],
+        [PortType.ROTARY, (port: number) => new RotaryAngleAnalogSensor(port)],
+        [PortType.BUZZER, (port: number) => new Buzzer(port)],
+        [PortType.MOISTURE, (port: number) => new MoistureSensor(port)]
     ]);
 
     export function initialize(): void {
@@ -76,7 +79,7 @@ namespace grove {
             let ctor = _typeToConstructor.get(type);
             let sensorObject = ctor ? ctor(port) : undefined;
             if (sensorObject == undefined) {
-                throw Error("Could not get ctor for type: " + type);
+                throw Error("Could not get constructor for type: " + type);
             }
             _configuredPorts[port] = {
                 type: type,

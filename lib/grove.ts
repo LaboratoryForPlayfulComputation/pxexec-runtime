@@ -13,6 +13,7 @@ type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
 type MoistureSensor = GrovePi.sensors.MoistureSensor
 type LED = GrovePi.sensors.LED
 type Buzzer = GrovePi.sensors.Buzzer
+type Sound = GrovePi.sensors.Sound
 
 //var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 var UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
@@ -27,6 +28,7 @@ var RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
 var MoistureSensor = GrovePi.sensors.MoistureSensor
 var LED = GrovePi.sensors.LED
 var Buzzer = GrovePi.sensors.Buzzer
+var Sound = GrovePi.sensors.Sound
 
 type Sensor = GrovePi.sensors.base.ISensor;
 
@@ -38,7 +40,8 @@ namespace grove {
         LED,
         MOISTURE,
         BUZZER,
-        ROTARY
+        ROTARY,
+        SOUND
     }
 
     interface StoredPort {
@@ -160,6 +163,12 @@ namespace grove {
     export function buzzerOff(pin: number) {
         var buzzer = <Buzzer>createOrGetSensor(pin, PortType.BUZZER);
         buzzer.turnOff()
+    }
+
+    //Sound Sensor
+    export function getSoundSensorValue(pin: number) {
+        var sound = <Sound>createOrGetSensor(pin, PortType.SOUND);
+        return sound.read()
     }
 }
 

@@ -13,3 +13,5 @@ Run `tsc` in the root of this repository and all the resulting code will be plac
 ## License
 
 This program is licensed under the terms of the GNU Lesser General Public License, version 3.0.
+
+License for the submodule lib/lpc-grove-js may be different than the of the rest of the program.

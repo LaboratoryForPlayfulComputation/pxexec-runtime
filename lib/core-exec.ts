@@ -4,7 +4,7 @@ namespace _pxexec {
 		handler: () => void
 	}
 
-	var forever_functions: Array<() => void>;
+	var forever_functions: Array<() => Promise<void>>;
 
 	var events: { [k: string]: EventDescription };
 
@@ -13,7 +13,7 @@ namespace _pxexec {
 		events = {};
 	}
 
-	export function add_forever(func: () => void) {
+	export function add_forever(func: () => Promise<void>) {
 		forever_functions.push(func);
 	}
 
@@ -22,17 +22,16 @@ namespace _pxexec {
 	}
 
 	export function run() {
-		while (true) {
-			for (let i = 0; i < forever_functions.length; i++) {
-				forever_functions[i]();
+		async function loop(): Promise<void> {
+			for (let f of forever_functions) {
+				await f();
 			}
-			for (let key in events) {
-				const ev = events[key];
-				if (ev.predicate()) {
-					ev.handler();
-				}
-			}
+			// This eventually blows the max call size. I hit it almost instantly
+			// if no forever function is registered.
+			return loop();
 		}
+
+		loop();
 	}
 }
 

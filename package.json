@@ -16,9 +16,11 @@
   "author": "Laboratory for Playful Computation",
   "license": "LGPL-3.0",
   "devDependencies": {
-    "@types/node": "^10.5.2"
+    "@types/node": "^10.5.2",
+    "@types/uuid": "^3.4.4"
   },
   "dependencies": {
-    "node-grovepi": "^2.2.2"
+    "node-grovepi": "^2.2.2",
+    "uuid": "^3.3.2"
   }
 }

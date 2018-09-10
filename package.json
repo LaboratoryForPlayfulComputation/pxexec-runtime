@@ -17,5 +17,8 @@
   "license": "LGPL-3.0",
   "devDependencies": {
     "@types/node": "^10.5.2"
+  },
+  "dependencies": {
+    "node-grovepi": "^2.2.2"
   }
 }

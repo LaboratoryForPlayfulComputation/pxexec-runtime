@@ -6,19 +6,14 @@
         "lib": [
             "es6"
         ],
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "noImplicitThis": true,
-        "noUnusedLocals": false,
+        "noUnusedLocals": true,
         "noUnusedParameters": true,
         "alwaysStrict": true,
         "removeComments": true,
         "outDir": "built/",
         "sourceMap": true,
         "declaration": true
-    },
-    "exclude": [
-        "node_modules",
-        "built/",
-        "decl/"
-    ]
+    }
 }

@@ -1,19 +1,21 @@
-import GrovePi from './lpc-grove-js-translation';
+import { GrovePi } from 'node-grovepi';
 
+type DigitalOutput = GrovePi.sensors.DigitalOutput;
 //type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
-type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
+type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital;
 //type AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
 //type DHTDigitalSensor = GrovePi.sensors.DHTDigital
 //type LightAnalogSensor = GrovePi.sensors.LightAnalog
-type DigitalButtonSensor = GrovePi.sensors.DigitalButton
+type DigitalButtonSensor = GrovePi.sensors.DigitalButton;
 //type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
-type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
+type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
 //type DustDigitalSensor = GrovePi.sensors.dustDigital
 //type DigitalOutput = GrovePi.sensors.DigitalOutput
-type MoistureSensor = GrovePi.sensors.MoistureSensor
-type LED = GrovePi.sensors.LED
-type Buzzer = GrovePi.sensors.Buzzer
-type Sound = GrovePi.sensors.Sound
+
+// Aliases
+
+type LED = DigitalOutput;
+type Buzzer = DigitalOutput;
 
 //var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 var UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
@@ -25,10 +27,6 @@ var DigitalButtonSensor = GrovePi.sensors.DigitalButton
 var RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
 //var DustDigitalSensor = GrovePi.sensors.dustDigital
 //var DigitalOutput = GrovePi.sensors.DigitalOutput
-var MoistureSensor = GrovePi.sensors.MoistureSensor
-var LED = GrovePi.sensors.LED
-var Buzzer = GrovePi.sensors.Buzzer
-var Sound = GrovePi.sensors.Sound
 
 type Sensor = GrovePi.sensors.base.ISensor;
 
@@ -38,10 +36,10 @@ namespace grove {
         ULTRASONIC,
         BUTTON,
         LED,
-        MOISTURE,
+        // MOISTURE,
         BUZZER,
         ROTARY,
-        SOUND
+        // SOUND,
     }
 
     interface StoredPort {
@@ -55,11 +53,10 @@ namespace grove {
 
     const _typeToConstructor: Map<PortType, (port: number) => Sensor> = new Map([
         [PortType.ULTRASONIC, (port: number) => new UltrasonicDigitalSensor(port)],
-        [PortType.BUTTON, (port : number) => new DigitalButtonSensor(port)],
-        [PortType.LED, (port: number) => new LED(port)],
+        [PortType.BUTTON, (port: number) => new DigitalButtonSensor(port)],
+        [PortType.LED, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
         [PortType.ROTARY, (port: number) => new RotaryAngleAnalogSensor(port)],
-        [PortType.BUZZER, (port: number) => new Buzzer(port)],
-        [PortType.MOISTURE, (port: number) => new MoistureSensor(port)]
+        [PortType.BUZZER, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
     ]);
 
     export function initialize(): void {
@@ -147,12 +144,14 @@ namespace grove {
         return rotaryAngleSensor.read()
     }
 
+    /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
+     * 
     // Moisture Sensor
     export function getMoistureValue(port: number) {
         var moistureSensor = <MoistureSensor>createOrGetSensor(port, PortType.MOISTURE);
 
         return moistureSensor.read()
-    }
+    }*/
 
     // Buzzer
     export function buzzerOn(pin: number) {
@@ -165,11 +164,13 @@ namespace grove {
         buzzer.turnOff()
     }
 
+    /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
+     * 
     //Sound Sensor
     export function getSoundSensorValue(pin: number) {
         var sound = <Sound>createOrGetSensor(pin, PortType.SOUND);
         return sound.read()
-    }
+    }*/
 }
 
 export default grove;

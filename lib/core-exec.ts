@@ -22,16 +22,13 @@ namespace _pxexec {
 	}
 
 	export function run() {
-		async function loop(): Promise<void> {
-			for (let f of forever_functions) {
-				await f();
+		for (let func of forever_functions) {
+			const this_loop = async (): Promise<void> => {
+				await func();
+				return this_loop();
 			}
-			// This eventually blows the max call size. I hit it almost instantly
-			// if no forever function is registered.
-			return loop();
+			this_loop();
 		}
-
-		loop();
 	}
 }
 

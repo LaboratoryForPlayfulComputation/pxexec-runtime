@@ -1,10 +1,10 @@
 import { ChildProcess, spawn } from 'child_process';
 import { Socket, createSocket } from 'dgram';
 import { EventEmitter } from 'events';
+import { AddressInfo } from 'net';
 
-import * as readline from 'readline';
-
-import * as uuidv4 from 'uuid/v4';
+//import * as readline from 'readline';
+//import * as uuidv4 from 'uuid/v4';
 
 namespace network {
 
@@ -12,39 +12,74 @@ namespace network {
 
 	const RESPONSE_CALLBACKS: { [k: number]: (...args: any[]) => void | undefined } = {};
 
+	const RECEIVE_HANDLERS: { [k: string]: Array<(m: string) => Promise<void>> } = {};
+
 	const _eventDispatcher: EventEmitter = new EventEmitter();
 
 	namespace signaling {
 		const _UDP_SIGNALING_PORT = 38714;
 		const _UDP_BROADCAST_ADDR = "255.255.255.255";
-		interface UDPSignalingOffer {
-			sourceid: string,
-			targetid: string,
-			encodedSDP: string,
+
+		interface UDPSignalingMarshallingFormat {
+			type: "offer" | "answer"
+			value: UDPSignalingPayload
+		}
+
+		interface UDPSignalingPayload {
+			from: string,
+			to: string,
+			escapedSDP: string,
 		}
 
 		let _socket: Socket | undefined = undefined;
 
-		export function enableUDPSignaling(): void {
+		let _offer_handler: ((sdp: string, from: string) => void) | undefined = undefined;
+		let _answer_handler: ((sdp: string, from: string) => void) | undefined = undefined;
+
+		function _unMarshalUDPSignallingData(msg: Buffer, _rinfo: AddressInfo) {
+			const data: UDPSignalingMarshallingFormat = <UDPSignalingMarshallingFormat>JSON.parse(msg.toString());
+			const type = data.type;
+			if (data.value.to == _id) {
+				switch (type) {
+					case "offer":
+						_offer_handler(data.value.escapedSDP, data.value.from);
+						break;
+					case "answer":
+						_answer_handler(data.value.escapedSDP, data.value.from);
+						break;
+				}
+			}
+		}
+
+		export function enableUDPSignaling(
+			on_offer: (sdp: string, from: string) => void,
+			on_answer: (sdp: string, from: string) => void
+		): void {
+			_offer_handler = on_offer;
+			_answer_handler = on_answer;
 			_socket = createSocket('udp4');
 
 			_socket.bind(_UDP_SIGNALING_PORT, function () {
 				_socket.setBroadcast(true);
 			})
 
-			_socket.on("message", (msg, rinfo) => {
-				console.log(`dgram in: "${msg.toString()}" from ${rinfo.address}:${rinfo.port}`)
-			})
+			_socket.on('message', _unMarshalUDPSignallingData);
 		}
 
-		export function broadcastOffer(other: string, sdp: string | Buffer) {
-			const msg: UDPSignalingOffer = {
-				sourceid: _id,
-				targetid: other,
-				encodedSDP: sdp.toString()
+		export function broadcast(type: "offer" | "answer", to: string, sdp: string | Buffer) {
+			const msg: UDPSignalingMarshallingFormat = {
+				type: type,
+				value: <UDPSignalingPayload>{
+					from: _id,
+					to: to,
+					escapedSDP: sdp.toString()
+				}
 			};
+
 			_socket.send(JSON.stringify(msg), _UDP_SIGNALING_PORT, _UDP_BROADCAST_ADDR, (err, bytes) => {
-				console.log(`callback from send: ${err}, ${bytes}`);
+				if (err != null && err != undefined) {
+					console.log(`callback from send: ${err}, ${bytes.toString()}`);
+				}
 			});
 		}
 	}
@@ -53,7 +88,7 @@ namespace network {
 	 * The base format of all messages FROM Python to this handler.
 	 */
 	interface RPCMarshallingFormat {
-		type: "event" | "response",
+		type: "event" | "response" | "throw",
 		value: RPCResponse | RPCEvent,
 	}
 
@@ -96,8 +131,6 @@ namespace network {
 	 * @param dataBuf the string to interpret
 	 */
 	function _unMarshalRPCData(dataBuf: string | Buffer) {
-		const dataStr = dataBuf.toString();
-		console.log(dataStr);
 		const data: RPCMarshallingFormat = <RPCMarshallingFormat>JSON.parse(dataBuf.toString());
 		const type = data.type;
 		switch (type) {
@@ -113,6 +146,17 @@ namespace network {
 					cb(response.value);
 				}
 				break;
+			case "throw":
+				const throwData = <RPCResponse>data.value;
+				delete RESPONSE_CALLBACKS[throwData.id];
+				console.log(`error in aiortc daemon ${throwData.rpcEndpoint}: ${throwData.value}`)
+		}
+	}
+
+	function _messageHandler(data: any) {
+		const callbacks = RECEIVE_HANDLERS[data.peer];
+		for (let cb of callbacks) {
+			cb(data.message);
 		}
 	}
 
@@ -126,6 +170,9 @@ namespace network {
 	export function initialize(peerid: string) {
 		_id = peerid;
 		_DAEMON_CHILD = spawn(PYTHON, ['-u', '-m', 'node-aiortc-daemon']);
+		_DAEMON_CHILD.on('error', (e) => {
+			console.log(e);
+		});
 		_DAEMON_CHILD.stdout.on('data', _unMarshalRPCData);
 		_DAEMON_CHILD.stderr.on('data', (data) => {
 			console.log(`python console: ${data}`);
@@ -133,39 +180,55 @@ namespace network {
 		_DAEMON_CHILD.on('close', (code) => {
 			console.log(`RTC daemon closed with status ${code} `);
 		});
-		console.log(`RTC Daemon created and initialized: ${_DAEMON_CHILD} `);
 
-		signaling.enableUDPSignaling();
+		_eventDispatcher.on('message_received', _messageHandler);
+
+		_eventDispatcher.on('channel_open', (data) => {
+			console.log(`Opened a channel with ${data.peer}`);
+		});
+
+		signaling.enableUDPSignaling(
+			(offer: string, from: string) => {
+				answer(offer, from, (answer) => { signaling.broadcast("answer", from, answer); });
+			},
+			(answer: string, from: string) => {
+				complete_offer(answer, from)
+			}
+		);
 	}
 
-	/**
-	 * Return the configured Peer ID.
-	 */
-	export function getId(): string {
-		return _id;
-	}
-
-	export function offer_to(otherpeer: string) {
-		offer((sdp) => {
-			console.log(sdp);
-			signaling.broadcastOffer(otherpeer, sdp);
+	export function connect(otherpeer: string) {
+		offer(otherpeer, (sdp) => {
+			signaling.broadcast("offer", otherpeer, sdp);
 		})
 	}
 
-	function offer(cb?: (s: string) => void): void {
-		_send_call("get_local_offer_sdp", cb);
+	function offer(peerid: string, cb?: (s: string) => void): void {
+		_send_call("create_peer_connection", (_status: true) => {
+			_send_call("offer", cb, [peerid]);
+		}, [peerid])
 	}
 
-	export function answer(offer: string, cb?: (s: string) => void): void {
-		_send_call("answer", cb, [offer]);
+	function answer(offer: string, peerid: string, cb?: (s: string) => void): void {
+		_send_call("create_peer_connection", (_status: true) => {
+			_send_call("answer", cb, [offer, peerid]);
+		}, [peerid])
 	}
 
-	export function complete_offer(answer: string, cb?: (s: string) => void): void {
-		_send_call("complete_offer", cb, [answer])
+	function complete_offer(answer: string, peerid: string, cb?: (s: string) => void): void {
+		_send_call("complete_offer", cb, [answer, peerid])
 	}
 
-	export function on_message(cb: (s: string) => void): void {
-		_eventDispatcher.addListener("channel_message", cb);
+	export function send(peerid: string, message: string) {
+		_send_call("send", undefined, [message, peerid])
+	}
+
+	export function onReceive(_peer: string, cb: (msg: string) => Promise<void>): void {
+		if (RECEIVE_HANDLERS[_peer] == undefined) {
+			RECEIVE_HANDLERS[_peer] = [cb]
+		} else {
+			RECEIVE_HANDLERS[_peer].push(cb);
+		}
 	}
 
 	/**

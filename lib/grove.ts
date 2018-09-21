@@ -1,15 +1,15 @@
 import { GrovePi } from 'node-grovepi';
 
 type DigitalOutput = GrovePi.sensors.DigitalOutput;
-//type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
+type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital;
-//type AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
-//type DHTDigitalSensor = GrovePi.sensors.DHTDigital
-//type LightAnalogSensor = GrovePi.sensors.LightAnalog
+type AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
+// type DHTDigitalSensor = GrovePi.sensors.DHTDigital
+type LightAnalogSensor = GrovePi.sensors.LightAnalog
 type DigitalButtonSensor = GrovePi.sensors.DigitalButton;
-//type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
+type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
-//type DustDigitalSensor = GrovePi.sensors.dustDigital
+type DustDigitalSensor = GrovePi.sensors.dustDigital
 //type DigitalOutput = GrovePi.sensors.DigitalOutput
 
 // Aliases
@@ -17,25 +17,31 @@ type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
 type LED = DigitalOutput;
 type Buzzer = DigitalOutput;
 
-//var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
+// var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 var UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
-//var AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
+var AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
 //var DHTDigitalSensor = GrovePi.sensors.DHTDigital
-//var LightAnalogSensor = GrovePi.sensors.LightAnalog
+var LightAnalogSensor = GrovePi.sensors.LightAnalog
 var DigitalButtonSensor = GrovePi.sensors.DigitalButton
-//var LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
+var LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 var RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
-//var DustDigitalSensor = GrovePi.sensors.dustDigital
+var DustDigitalSensor = GrovePi.sensors.dustDigital
 //var DigitalOutput = GrovePi.sensors.DigitalOutput
 
 type Sensor = GrovePi.sensors.base.ISensor;
 
 namespace grove {
 
-    enum PortType {
+    enum SensorType {
         ULTRASONIC,
         BUTTON,
         LED,
+        I2C,
+        LOUDNESS,
+        AIR,
+        LIGHT,
+        DHT,
+        DUST,
         // MOISTURE,
         BUZZER,
         ROTARY,
@@ -43,7 +49,7 @@ namespace grove {
     }
 
     interface StoredPort {
-        type: PortType,
+        type: SensorType,
         sensor: any,
     }
 
@@ -51,12 +57,18 @@ namespace grove {
 
     var _board: GrovePi.board | undefined;
 
-    const _typeToConstructor: Map<PortType, (port: number) => Sensor> = new Map([
-        [PortType.ULTRASONIC, (port: number) => new UltrasonicDigitalSensor(port)],
-        [PortType.BUTTON, (port: number) => new DigitalButtonSensor(port)],
-        [PortType.LED, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
-        [PortType.ROTARY, (port: number) => new RotaryAngleAnalogSensor(port)],
-        [PortType.BUZZER, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
+    const _typeToConstructor: Map<SensorType, (port: number) => Sensor> = new Map([
+        [SensorType.ULTRASONIC, (port: number) => new UltrasonicDigitalSensor(port)],
+        [SensorType.BUTTON, (port: number) => new DigitalButtonSensor(port)],
+        [SensorType.LED, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
+        [SensorType.ROTARY, (port: number) => new RotaryAngleAnalogSensor(port)],
+        [SensorType.BUZZER, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
+        [SensorType.LOUDNESS, (port: number) => new LoudnessAnalogSensor(port)],
+        [SensorType.AIR, (port: number) => new AirQualityAnalogSensor(port)],
+        [SensorType.LIGHT, (port: number) => new LightAnalogSensor(port)],
+
+        //[SensorType.DHT, (port: number) => new DHTDigitalSensor(port,2,"celcuis")],
+        //[SensorType.I2C, (port: number) => new AccelerationI2cSensor(port)],
     ]);
 
     export function initialize(): void {
@@ -73,7 +85,7 @@ namespace grove {
         _configuredPorts = {};
     }
 
-    function createOrGetSensor(port: number, type: PortType): Sensor {
+    function createOrGetSensor(port: number, type: SensorType): Sensor {
         var storedPort = _configuredPorts[port];
         if (storedPort == undefined) {
             let ctor = _typeToConstructor.get(type);
@@ -94,18 +106,18 @@ namespace grove {
 
     // Led
     export function ledOn(port: number) {
-        const led = <LED>createOrGetSensor(port, PortType.LED);
+        const led = <LED>createOrGetSensor(port, SensorType.LED);
         led.turnOn();
     }
 
     export function ledOff(port: number) {
-        const led = <LED>createOrGetSensor(port, PortType.LED);
+        const led = <LED>createOrGetSensor(port, SensorType.LED);
         led.turnOff();
     }
 
     // Ultrasonic Ranger
     export function pollUltrasonicRanger(port: number) {
-        var ultrasonicSensor = <UltrasonicDigitalSensor>createOrGetSensor(port, PortType.ULTRASONIC);
+        var ultrasonicSensor = <UltrasonicDigitalSensor>createOrGetSensor(port, SensorType.ULTRASONIC);
 
         ultrasonicSensor.on('change', function (_res: any) {
             // Do on Change
@@ -115,7 +127,7 @@ namespace grove {
 
     // Button
     export function pollButtonPress(port: number) {
-        var buttonSensor = <DigitalButtonSensor>createOrGetSensor(port, PortType.BUTTON);
+        var buttonSensor = <DigitalButtonSensor>createOrGetSensor(port, SensorType.BUTTON);
 
         buttonSensor.on('down', function (res: string) {
             if (res == 'longpress') {
@@ -130,7 +142,7 @@ namespace grove {
 
     // Rotary Angle
     export function pollRotaryAngle(port: number) {
-        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, PortType.ROTARY);
+        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, SensorType.ROTARY);
 
         rotaryAngleSensor.start()
         rotaryAngleSensor.on('data', function (_res: any) {
@@ -139,28 +151,50 @@ namespace grove {
     }
 
     export function getRotaryAngleValue(port: number) {
-        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, PortType.ROTARY);
+        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, SensorType.ROTARY);
 
         return rotaryAngleSensor.read()
+    }
+
+    // Loudness
+    export function getLoudnessValue(port: number) {
+        var loudAnalogSensor = <LoudnessAnalogSensor>createOrGetSensor(port, SensorType.LOUDNESS)
+
+        return loudAnalogSensor.read()
+    }
+
+    // Air Quality
+    export function getAirQualityValue(port: number) {
+        var airAnalogSensor = <AirQualityAnalogSensor>createOrGetSensor(port, SensorType.AIR)
+
+        return airAnalogSensor.read()
+    }
+
+    // Light 
+
+    export function getLightValue(port: number) {
+        var lightAnalogSensor = <LightAnalogSensor>createOrGetSensor(port, SensorType.LIGHT)
+
+        return lightAnalogSensor.read()
     }
 
     /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
      * 
     // Moisture Sensor
     export function getMoistureValue(port: number) {
-        var moistureSensor = <MoistureSensor>createOrGetSensor(port, PortType.MOISTURE);
+        var moistureSensor = <MoistureSensor>createOrGetSensor(port, SensorType.MOISTURE);
 
         return moistureSensor.read()
     }*/
 
     // Buzzer
     export function buzzerOn(pin: number) {
-        var buzzer = <Buzzer>createOrGetSensor(pin, PortType.BUZZER);
+        var buzzer = <Buzzer>createOrGetSensor(pin, SensorType.BUZZER);
         buzzer.turnOn()
     }
 
     export function buzzerOff(pin: number) {
-        var buzzer = <Buzzer>createOrGetSensor(pin, PortType.BUZZER);
+        var buzzer = <Buzzer>createOrGetSensor(pin, SensorType.BUZZER);
         buzzer.turnOff()
     }
 
@@ -168,7 +202,7 @@ namespace grove {
      * 
     //Sound Sensor
     export function getSoundSensorValue(pin: number) {
-        var sound = <Sound>createOrGetSensor(pin, PortType.SOUND);
+        var sound = <Sound>createOrGetSensor(pin, SensorType.SOUND);
         return sound.read()
     }*/
 }

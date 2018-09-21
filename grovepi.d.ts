@@ -103,6 +103,8 @@ declare module 'node-grovepi' {
                     public read(): number | false;
                 }
                 class I2C extends Sensor {
+                    constructor(pin: number);
+                    
                 }
             }
             class DigitalInput extends base.Digital { }

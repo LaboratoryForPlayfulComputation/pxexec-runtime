@@ -1,24 +1,23 @@
 import { GrovePi } from 'node-grovepi';
 
-type DigitalOutput = GrovePi.sensors.DigitalOutput;
-//type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
+type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital;
 type AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
-// type DHTDigitalSensor = GrovePi.sensors.DHTDigital
+type DHTDigitalSensor = GrovePi.sensors.DHTDigital
 type LightAnalogSensor = GrovePi.sensors.LightAnalog
 type DigitalButtonSensor = GrovePi.sensors.DigitalButton;
 type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
-// type FourDigitDigital = GrovePi.sensors.FourDigitDigital;
-//type DustDigitalSensor = GrovePi.sensors.dustDigital
-//type DigitalOutput = GrovePi.sensors.DigitalOutput
+type FourDigitDigital = GrovePi.sensors.FourDigitDigital;
+type DustDigitalSensor = GrovePi.sensors.dustDigital
+type DigitalOutput = GrovePi.sensors.DigitalOutput
 
 // Aliases
 
 type LED = DigitalOutput;
 type Buzzer = DigitalOutput;
 
-//var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
+var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 var UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
 var AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
 var DHTDigitalSensor = GrovePi.sensors.DHTDigital
@@ -28,20 +27,21 @@ var LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 var RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
 var FourDigitDigital = GrovePi.sensors.FourDigitDigital;
 var DustDigitalSensor = GrovePi.sensors.dustDigital
-//var DigitalOutput = GrovePi.sensors.DigitalOutput
+var DigitalOutput = GrovePi.sensors.DigitalOutput
 
 type Sensor = GrovePi.sensors.base.ISensor;
+type SensorConstructor = (port: number, optData?: any) => Sensor;
 
 namespace grove {
 
-    enum SensorType {
+    enum SensorType{
         ULTRASONIC,
         BUTTON,
         LED,
-        I2C,
+        ACCEL_I2C,
         LOUDNESS,
-        AIR,
-        LIGHT,
+        AIR_QUALITY,
+        BRIGHTNESS,
         DHT,
         DUST,
         // MOISTURE,
@@ -60,20 +60,38 @@ namespace grove {
 
     var _board: GrovePi.board | undefined;
 
-    const _typeToConstructor: Map<SensorType, (port: number) => Sensor> = new Map([
-        [SensorType.ULTRASONIC, (port: number) => new UltrasonicDigitalSensor(port)],
-        [SensorType.BUTTON, (port: number) => new DigitalButtonSensor(port)],
-        [SensorType.LED, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
-        [SensorType.ROTARY, (port: number) => new RotaryAngleAnalogSensor(port)],
-        [SensorType.BUZZER, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
-        [SensorType.LOUDNESS, (port: number) => new LoudnessAnalogSensor(port)],
-        [SensorType.AIR, (port: number) => new AirQualityAnalogSensor(port)],
-        [SensorType.LIGHT, (port: number) => new LightAnalogSensor(port)],
-        //[SensorType.FOUR, (port: number) => new FourDigitDigital(port)],
-        //[SensorType.DUST, (port: number) => new DustDigitalSensor(port)],
-        //[SensorType.DHT, (port: number) => new DHTDigitalSensor(port,2,'CELCIUS')],
-        //[SensorType.I2C, (port: number) => new AccelerationI2cSensor(port)],
-    ]);
+    function _typeToConstructor(k : SensorType) : SensorConstructor {
+        switch (k) {
+        case SensorType.ULTRASONIC:
+            return (port: number) => new UltrasonicDigitalSensor(port);
+        case SensorType.BUTTON:
+            return (port: number) => new DigitalButtonSensor(port);
+        case SensorType.LED:
+            return (port: number) => new DigitalOutput(port);
+        case SensorType.ACCEL_I2C:
+            return (port: number) => new AccelerationI2cSensor(port);
+        case SensorType.LOUDNESS:
+            return (port: number) => new UltrasonicDigitalSensor(port);
+        case SensorType.AIR_QUALITY:
+            return (port: number) => new AirQualityAnalogSensor(port);
+        case SensorType.BRIGHTNESS:
+            return (port: number) => new LightAnalogSensor(port);
+        case SensorType.DHT:
+            return (port: number, optData?: any) => {
+                return new DHTDigitalSensor(port, optData.moduleType, optData.scale);
+            }
+        case SensorType.DUST:
+            return (port: number) => new DustDigitalSensor(port);
+        case SensorType.BUZZER:
+            return (port: number) => new DigitalOutput(port);
+        case SensorType.ROTARY:
+            return (port: number) => new RotaryAngleAnalogSensor(port);
+        case SensorType.FOUR:
+            return (port: number) => new FourDigitDigital(port);
+        default:
+            throw new Error("Unrecognized port type: " + k);
+        }
+    }
 
     export function initialize(): void {
         _board = new GrovePi.board({
@@ -89,11 +107,11 @@ namespace grove {
         _configuredPorts = {};
     }
 
-    function createOrGetSensor(port: number, type: SensorType): Sensor {
+    function createOrGetSensor(port: number, type: SensorType, optData?: any): Sensor {
         var storedPort = _configuredPorts[port];
         if (storedPort == undefined) {
-            let ctor = _typeToConstructor.get(type);
-            let sensorObject = ctor ? ctor(port) : undefined;
+            let ctor = _typeToConstructor(type);
+            let sensorObject = ctor ? ctor(port, optData) : undefined;
             if (sensorObject == undefined) {
                 throw Error("Could not get constructor for type: " + type);
             }
@@ -169,7 +187,7 @@ namespace grove {
 
     // Air Quality
     export function getAirQualityValue(port: number) {
-        var airAnalogSensor = <AirQualityAnalogSensor>createOrGetSensor(port, SensorType.AIR)
+        var airAnalogSensor = <AirQualityAnalogSensor>createOrGetSensor(port, SensorType.AIR_QUALITY)
 
         return airAnalogSensor.read()
     }
@@ -177,7 +195,7 @@ namespace grove {
     // Light 
 
     export function getLightValue(port: number) {
-        var lightAnalogSensor = <LightAnalogSensor>createOrGetSensor(port, SensorType.LIGHT)
+        var lightAnalogSensor = <LightAnalogSensor>createOrGetSensor(port, SensorType.BRIGHTNESS)
 
         return lightAnalogSensor.read()
     }

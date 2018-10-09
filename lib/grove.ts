@@ -1,7 +1,7 @@
 import { GrovePi } from 'node-grovepi';
 
 type DigitalOutput = GrovePi.sensors.DigitalOutput;
-type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
+//type AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital;
 type AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
 // type DHTDigitalSensor = GrovePi.sensors.DHTDigital
@@ -9,7 +9,8 @@ type LightAnalogSensor = GrovePi.sensors.LightAnalog
 type DigitalButtonSensor = GrovePi.sensors.DigitalButton;
 type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
-type DustDigitalSensor = GrovePi.sensors.dustDigital
+// type FourDigitDigital = GrovePi.sensors.FourDigitDigital;
+//type DustDigitalSensor = GrovePi.sensors.dustDigital
 //type DigitalOutput = GrovePi.sensors.DigitalOutput
 
 // Aliases
@@ -17,14 +18,15 @@ type DustDigitalSensor = GrovePi.sensors.dustDigital
 type LED = DigitalOutput;
 type Buzzer = DigitalOutput;
 
-// var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
+//var AccelerationI2cSensor = GrovePi.sensors.AccelerationI2C
 var UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
 var AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
-//var DHTDigitalSensor = GrovePi.sensors.DHTDigital
+var DHTDigitalSensor = GrovePi.sensors.DHTDigital
 var LightAnalogSensor = GrovePi.sensors.LightAnalog
 var DigitalButtonSensor = GrovePi.sensors.DigitalButton
 var LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 var RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
+var FourDigitDigital = GrovePi.sensors.FourDigitDigital;
 var DustDigitalSensor = GrovePi.sensors.dustDigital
 //var DigitalOutput = GrovePi.sensors.DigitalOutput
 
@@ -45,6 +47,7 @@ namespace grove {
         // MOISTURE,
         BUZZER,
         ROTARY,
+        FOUR,
         // SOUND,
     }
 
@@ -66,8 +69,9 @@ namespace grove {
         [SensorType.LOUDNESS, (port: number) => new LoudnessAnalogSensor(port)],
         [SensorType.AIR, (port: number) => new AirQualityAnalogSensor(port)],
         [SensorType.LIGHT, (port: number) => new LightAnalogSensor(port)],
-
-        //[SensorType.DHT, (port: number) => new DHTDigitalSensor(port,2,"celcuis")],
+        //[SensorType.FOUR, (port: number) => new FourDigitDigital(port)],
+        //[SensorType.DUST, (port: number) => new DustDigitalSensor(port)],
+        //[SensorType.DHT, (port: number) => new DHTDigitalSensor(port,2,'CELCIUS')],
         //[SensorType.I2C, (port: number) => new AccelerationI2cSensor(port)],
     ]);
 

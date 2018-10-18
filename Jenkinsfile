@@ -14,7 +14,8 @@ pipeline {
     }
     stage('Package') {
       steps {
-        archiveArtifacts 'built/lib/**/*.*s*'
+        sh 'cd built && tar cvzf pxexec-runtime.tar.gz lib/**/*.*s*'
+        archiveArtifacts 'built/pxexec-runtime.tar.gz'
       }
     }
   }

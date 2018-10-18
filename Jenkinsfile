@@ -1,13 +1,14 @@
 pipeline {
   agent {
     docker {
-      image 'node-ts3:latest'
+      image 'node:8.12.0-stretch'
     }
 
   }
   stages {
     stage('Build') {
       steps {
+        sh 'npm install -g typescript'
         sh 'npm install && tsc'
       }
     }

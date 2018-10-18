@@ -12,5 +12,15 @@ pipeline {
         sh 'npm install && tsc'
       }
     }
+    stage('Test') {
+      steps {
+        sh 'node built/test.js'
+      }
+    }
+    stage('Package') {
+      steps {
+        archiveArtifacts 'built/lib/**/.*s'
+      }
+    }
   }
 }

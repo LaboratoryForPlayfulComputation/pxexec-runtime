@@ -1,5 +1,7 @@
 # pxexec-runtime
 
+[![Build Status](https://ci.playfulcomputation.group/buildStatus/icon?job=pxexec-runtime/master)](https://ci.playfulcomputation.group/job/pxexec-runtime/job/master/)
+
 This repository includes runtime support libraries for compiling [PXT](github.com/microsoft/pxt) static-typescript
 programs using `tsc` and running them using `node`.
 

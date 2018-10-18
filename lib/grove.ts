@@ -126,17 +126,6 @@ namespace grove {
         return storedPort.sensor;
     }
 
-    // Led
-    export function ledOn(port: number) {
-        const led = <LED>createOrGetSensor(port, SensorType.LED);
-        led.turnOn();
-    }
-
-    export function ledOff(port: number) {
-        const led = <LED>createOrGetSensor(port, SensorType.LED);
-        led.turnOff();
-    }
-
     // Ultrasonic Ranger
     export function pollUltrasonicRanger(port: number) {
         var ultrasonicSensor = <UltrasonicDigitalSensor>createOrGetSensor(port, SensorType.ULTRASONIC);
@@ -162,20 +151,22 @@ namespace grove {
         buttonSensor.watch()
     }
 
-    // Rotary Angle
-    export function pollRotaryAngle(port: number) {
-        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, SensorType.ROTARY);
-
-        rotaryAngleSensor.start()
-        rotaryAngleSensor.on('data', function (_res: any) {
-            // Do on Change
-        })
+    // Led
+    export function ledOn(port: number) {
+        const led = <LED>createOrGetSensor(port, SensorType.LED);
+        led.turnOn();
     }
 
-    export function getRotaryAngleValue(port: number) {
-        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, SensorType.ROTARY);
+    export function ledOff(port: number) {
+        const led = <LED>createOrGetSensor(port, SensorType.LED);
+        led.turnOff();
+    }
 
-        return rotaryAngleSensor.read()
+    // Acceleration I2c
+    export function getAccelerationValue(port: number) {
+        var accI2CSensor = <AccelerationI2cSensor>createOrGetSensor(port, SensorType.ACCEL_I2C)
+
+        return accI2CSensor.read()
     }
 
     // Loudness
@@ -192,22 +183,35 @@ namespace grove {
         return airAnalogSensor.read()
     }
 
-    // Light 
-
+    // Brightness 
     export function getLightValue(port: number) {
         var lightAnalogSensor = <LightAnalogSensor>createOrGetSensor(port, SensorType.BRIGHTNESS)
 
         return lightAnalogSensor.read()
     }
 
-    /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
-     * 
-    // Moisture Sensor
-    export function getMoistureValue(port: number) {
-        var moistureSensor = <MoistureSensor>createOrGetSensor(port, SensorType.MOISTURE);
+    // DHT
+    export function getDHTValue(port: number, optData?: any) {
+        var dhtSensor = <DHTDigitalSensor>createOrGetSensor(port, SensorType.DHT, optData)
 
-        return moistureSensor.read()
-    }*/
+        return dhtSensor.read()
+    }
+
+    // Dust
+    export function pollDustValue(port: number) {
+        var dustSensor = <DustDigitalSensor>createOrGetSensor(port, SensorType.DUST)
+
+        dustSensor.start()
+        dustSensor.on('data', function (_res: any) {
+            // Do on Change
+        })
+    }
+
+    export function getDustValue(port: number) {
+        var dustSensor = <DustDigitalSensor>createOrGetSensor(port, SensorType.DUST)
+
+        return dustSensor.read()
+    }
 
     // Buzzer
     export function buzzerOn(pin: number) {
@@ -219,6 +223,40 @@ namespace grove {
         var buzzer = <Buzzer>createOrGetSensor(pin, SensorType.BUZZER);
         buzzer.turnOff()
     }
+
+    // Rotary Angle
+    export function pollRotaryAngle(port: number) {
+        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, SensorType.ROTARY);
+
+        rotaryAngleSensor.start()
+        rotaryAngleSensor.on('data', function (_res: any) {
+            // Do on Change
+        })
+    }
+
+    export function getRotaryAngleValue(port: number) {
+        var rotaryAngleSensor = <RotaryAngleAnalogSensor>createOrGetSensor(port, SensorType.ROTARY);
+
+        return rotaryAngleSensor.read()
+    }
+
+    // Four digit
+    export function getFourDigitValue(port: number) {
+        var fourDigit = <FourDigitDigital>createOrGetSensor(port, SensorType.FOUR)
+
+        return fourDigit.read()
+    }
+
+    
+
+    /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
+     * 
+    // Moisture Sensor
+    export function getMoistureValue(port: number) {
+        var moistureSensor = <MoistureSensor>createOrGetSensor(port, SensorType.MOISTURE);
+
+        return moistureSensor.read()
+    }*/
 
     /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
      * 

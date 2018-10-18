@@ -14,6 +14,7 @@ pipeline {
     }
     stage('Package') {
       steps {
+        sh 'ls -la'
         archiveArtifacts 'built/lib/**/.*s'
       }
     }

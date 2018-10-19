@@ -181,7 +181,10 @@ namespace network {
 			console.log(`RTC daemon closed with status ${code} `);
 		});
 
-		_eventDispatcher.on('message_received', _messageHandler);
+		_eventDispatcher.on('channel_message', _messageHandler);
+		_eventDispatcher.on('message_sent', (data) => {
+			console.log(`message sent: ${data}`);
+		})
 
 		_eventDispatcher.on('channel_open', (data) => {
 			console.log(`Opened a channel with ${data.peer}`);

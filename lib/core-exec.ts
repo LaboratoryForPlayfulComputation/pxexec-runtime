@@ -1,32 +1,32 @@
-namespace _pxexec {
-	export interface EventDescription {
-		predicate: () => boolean,
-		handler: () => void
-	}
+export interface IEventDescription {
+	predicate: () => boolean,
+	handler: () => void
+}
 
-	var forever_functions: Array<() => void>;
+let foreverFunctions: Array<() => void>;
 
-	var events: { [k: string]: EventDescription };
+let events: { [k: string]: IEventDescription };
 
-	export function init() {
-		forever_functions = [];
-		events = {};
-	}
+export function init() {
+	foreverFunctions = [];
+	events = {};
+}
 
-	export function add_forever(func: () => void) {
-		forever_functions.push(func);
-	}
+export function add_forever(func: () => void) {
+	foreverFunctions.push(func);
+}
 
-	export function register_event(eventId: string, event: EventDescription) {
-		events[eventId] = event;
-	}
+export function register_event(eventId: string, event: IEventDescription) {
+	events[eventId] = event;
+}
 
-	export function run() {
-		while (true) {
-			for (let i = 0; i < forever_functions.length; i++) {
-				forever_functions[i]();
-			}
-			for (let key in events) {
+export function run() {
+	while (true) {
+		for (const f of foreverFunctions) {
+			f();
+		}
+		for (const key in events) {
+			if (events.hasOwnProperty(key)) {
 				const ev = events[key];
 				if (ev.predicate()) {
 					ev.handler();
@@ -36,4 +36,3 @@ namespace _pxexec {
 	}
 }
 
-export default _pxexec;

@@ -1,5 +1,5 @@
 
-import grove from './lib/grove';
+import * as grove from './lib/grove';
 
 grove.initialize();
 

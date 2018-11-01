@@ -1,17 +1,13 @@
-import _pxexec from './core-exec';
+import * as _pxexec from './core-exec';
 
-namespace loops {
-	export function pause(ms: number) {
-		let waitTil = new Date(new Date().getTime() + ms);
+export function pause(ms: number) {
+	const waitTil = new Date(new Date().getTime() + ms);
 
-		while (new Date() < waitTil) {
-			// This is a spinlock, and it blocks the entire application
-		}
-	}
-
-	export function forever(h: () => void) {
-		_pxexec.add_forever(h);
+	while (new Date() < waitTil) {
+		// This is a spinlock, and it blocks the entire application
 	}
 }
 
-export default loops;
+export function forever(h: () => void) {
+	_pxexec.add_forever(h);
+}

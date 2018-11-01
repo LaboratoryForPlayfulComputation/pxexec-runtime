@@ -219,9 +219,6 @@ declare module 'node-grovepi' {
                 public start(): void;
                 public stop(): void;
             }
-            // These things aren't in the NPM package, but they were in our fork.
-            var MoistureAnalog: undefined;
-            var SoundAnalog: undefined;
         }
     }
 }

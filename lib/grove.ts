@@ -1,4 +1,5 @@
 import { GrovePi } from 'node-grovepi';
+import * as loops from './loops';
 
 // Type aliases
 type DigitalOutput = GrovePi.sensors.DigitalOutput;
@@ -6,10 +7,12 @@ type DigitalOutput = GrovePi.sensors.DigitalOutput;
 type UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital;
 // type AirQualityAnalogSensor = GrovePi.sensors.AirQualityAnalog
 // type DHTDigitalSensor = GrovePi.sensors.DHTDigital
-// type LightAnalogSensor = GrovePi.sensors.LightAnalog
+type LightAnalogSensor = GrovePi.sensors.LightAnalog
 type DigitalButtonSensor = GrovePi.sensors.DigitalButton;
-// type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
+type LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog
 type RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
+type MoistureAnalogSensor = GrovePi.sensors.base.Analog;
+type TemperatureAnalogSensor = GrovePi.sensors.TemperatureAnalog;
 // type DustDigitalSensor = GrovePi.sensors.dustDigital
 // type DigitalOutput = GrovePi.sensors.DigitalOutput
 
@@ -17,9 +20,13 @@ type LED = DigitalOutput;
 type Buzzer = DigitalOutput;
 
 // Constructor aliases
-const UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital
-const DigitalButtonSensor = GrovePi.sensors.DigitalButton
-const RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog
+const UltrasonicDigitalSensor = GrovePi.sensors.UltrasonicDigital;
+const DigitalButtonSensor = GrovePi.sensors.DigitalButton;
+const RotaryAngleAnalogSensor = GrovePi.sensors.RotaryAnalog;
+const LightAnalogSensor = GrovePi.sensors.LightAnalog;
+const LoudnessAnalogSensor = GrovePi.sensors.LoudnessAnalog;
+const MoistureAnalogSensor = GrovePi.sensors.base.Analog;
+const TemperatureAnalogSensor = GrovePi.sensors.TemperatureAnalog;
 
 type Sensor = GrovePi.sensors.base.ISensor;
 
@@ -28,10 +35,12 @@ enum PortType {
     ULTRASONIC,
     BUTTON,
     LED,
-    // MOISTURE,
+    MOISTURE,
     BUZZER,
     ROTARY,
-    // SOUND,
+    LIGHT,
+    SOUND,
+    TEMPERATURE
 }
 
 interface IStoredPort {
@@ -48,6 +57,10 @@ const typeToConstructor: Map<PortType, (port: number) => Sensor> = new Map([
     [PortType.LED, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
     [PortType.ROTARY, (port: number) => new RotaryAngleAnalogSensor(port)],
     [PortType.BUZZER, (port: number) => new GrovePi.sensors.DigitalOutput(port)],
+    [PortType.LIGHT, (port: number) => new LightAnalogSensor(port)],
+    [PortType.SOUND, (port: number) => new LoudnessAnalogSensor(port)],
+    [PortType.MOISTURE, (port: number) => new MoistureAnalogSensor(port)],
+    [PortType.TEMPERATURE, (port: number) => new TemperatureAnalogSensor(port)]
 ]);
 
 export function initialize(): void {
@@ -88,67 +101,66 @@ export function ledOff(port: number) {
 }
 
 // Ultrasonic Ranger
-export function pollUltrasonicRanger(port: number) {
-    const ultrasonicSensor = createOrGetSensor(port, PortType.ULTRASONIC) as UltrasonicDigitalSensor;
+// export function pollUltrasonicRanger(port: number) {
+//     const ultrasonicSensor = createOrGetSensor(port, PortType.ULTRASONIC) as UltrasonicDigitalSensor;
 
-    // tslint:disable-next-line:variable-name
-    ultrasonicSensor.on('change', (_res: any) => {
-        // Do on Change
-    })
-    ultrasonicSensor.watch()
-}
+//     // tslint:disable-next-line:variable-name
+//     ultrasonicSensor.on('change', (_res: any) => {
+//         // Do on Change
+//     })
+//     ultrasonicSensor.watch()
+// }
 
 // Button
-export function pollButtonPress(port: number) {
+export function pollLongButtonPress(port: number, handler: () => void) {
     const buttonSensor = createOrGetSensor(port, PortType.BUTTON) as DigitalButtonSensor;
 
     buttonSensor.on('down', (res: string) => {
         if ('longpress' === res) {
-            // Handle long press
-        }
-        else {
-            // handle short press
+            handler();
         }
     })
-    buttonSensor.watch()
+    buttonSensor.watch();
+}
+
+export function pollShortButtonPress(port: number, handler: () => void) {
+    const buttonSensor = createOrGetSensor(port, PortType.BUTTON) as DigitalButtonSensor;
+
+    buttonSensor.on('down', (res: string) => {
+        if ('longpress' !== res) {
+            handler();
+        }
+    })
+    buttonSensor.watch();
 }
 
 // Rotary Angle
-export function pollRotaryAngle(port: number) {
-    const rotaryAngleSensor = createOrGetSensor(port, PortType.ROTARY) as RotaryAngleAnalogSensor;
+// export function pollRotaryAngle(port: number) {
+//     const rotaryAngleSensor = createOrGetSensor(port, PortType.ROTARY) as RotaryAngleAnalogSensor;
 
-    rotaryAngleSensor.start()
-    // tslint:disable-next-line:variable-name
-    rotaryAngleSensor.on('data', (_res: any) => {
-        // Do on Change
-    })
-}
+//     rotaryAngleSensor.start()
+//     // tslint:disable-next-line:variable-name
+//     rotaryAngleSensor.on('data', (_res: any) => {
+//         // Do on Change
+//     })
+// }
 
 export function getRotaryAngleValue(port: number) {
     const rotaryAngleSensor = createOrGetSensor(port, PortType.ROTARY) as RotaryAngleAnalogSensor;
 
-    return rotaryAngleSensor.read()
+    return rotaryAngleSensor.read();
 }
 
 export function getUltrasonicRangerValue(port: number) {
     const ultrasonicRanger = createOrGetSensor(port, PortType.ULTRASONIC) as UltrasonicDigitalSensor;
 
-    return ultrasonicRanger.read()
+    return ultrasonicRanger.read();
 }
-
-/* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
- * 
-// Moisture Sensor
-export function getMoistureValue(port: number) {
-    let moistureSensor = <MoistureSensor>createOrGetSensor(port, PortType.MOISTURE);
-
-    return moistureSensor.read()
-}*/
 
 // Buzzer
 export function buzzerOn(pin: number) {
     const buzzer = createOrGetSensor(pin, PortType.BUZZER) as Buzzer;
-    buzzer.turnOn()
+    buzzer.turnOn();
 }
 
 export function buzzerOff(pin: number) {
@@ -156,11 +168,38 @@ export function buzzerOff(pin: number) {
     buzzer.turnOff()
 }
 
-    /* This was part of the library node-grovepi when we forked it, but it's not in the NPM.
-     * 
-    //Sound Sensor
-    export function getSoundSensorValue(pin: number) {
-        let sound = <Sound>createOrGetSensor(pin, PortType.SOUND);
-        return sound.read()
-    }*/
+export function buzzerBeep(pin: number, ms: number) {
+    const buzzer = createOrGetSensor(pin, PortType.BUZZER) as Buzzer;
 
+    buzzer.turnOn();
+    loops.pause(ms);
+    buzzer.turnOff();
+}
+
+// Light
+export function getLightValue(pin: number) {
+    const light = createOrGetSensor(pin, PortType.LIGHT) as LightAnalogSensor;
+
+    return light.read();
+}
+
+// Sound
+export function getSoundValue(pin: number) {
+    const sound = createOrGetSensor(pin, PortType.SOUND) as LoudnessAnalogSensor;
+
+    return sound.read();
+}
+
+// Moisture
+export function getMoistureValue(pin: number) {
+    const moisture = createOrGetSensor(pin, PortType.MOISTURE) as MoistureAnalogSensor;
+
+    return moisture.read();
+}
+
+// Temperature
+export function getTemperatureValue(pin: number) {
+    const temp = createOrGetSensor(pin, PortType.TEMPERATURE) as TemperatureAnalogSensor;
+
+    return temp.read();
+}

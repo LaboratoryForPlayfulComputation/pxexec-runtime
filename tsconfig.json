@@ -4,7 +4,8 @@
         "moduleResolution": "node",
         "target": "es5",
         "lib": [
-            "es6"
+            "esnext",
+            "dom"
         ],
         "noImplicitAny": true,
         "noImplicitThis": true,
@@ -12,8 +13,17 @@
         "noUnusedParameters": true,
         "alwaysStrict": true,
         "removeComments": true,
-        "outDir": "built/",
+        "outDir": "dist/",
         "sourceMap": true,
         "declaration": true
-    }
+    },
+    "include": [
+        "**/*.d.ts",
+        "lib/**/*.ts",
+        "examples/**/*.ts"
+    ],
+    "exclude": [
+        "dist/*",
+        "node_modules/*"
+    ]
 }

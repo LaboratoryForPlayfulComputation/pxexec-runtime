@@ -1,35 +1,14 @@
-namespace _pxexec {
-	export interface EventDescription {
-		predicate: () => boolean,
-		handler: () => void
-	}
+import Fiber = require("fibers");
 
-	var forever_functions: Array<() => Promise<void>>;
+export const env = process.env;
 
-	var events: { [k: string]: EventDescription };
-
-	export function init() {
-		forever_functions = [];
-		events = {};
-	}
-
-	export function add_forever(func: () => Promise<void>) {
-		forever_functions.push(func);
-	}
-
-	export function register_event(eventId: string, event: EventDescription) {
-		events[eventId] = event;
-	}
-
-	export function run() {
-		for (let func of forever_functions) {
-			const this_loop = async (): Promise<void> => {
-				await func();
-				return this_loop();
-			}
-			this_loop();
-		}
-	}
+export function _await<T>(task: Promise<T>): T {
+	const fiber = Fiber.current;
+	let r: T;
+	task.then((val: T) => {
+		r = val;
+		fiber.run();
+	});
+	Fiber.yield();
+	return r;
 }
-
-export default _pxexec;

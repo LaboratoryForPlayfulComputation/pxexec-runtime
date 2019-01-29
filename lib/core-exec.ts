@@ -3,6 +3,12 @@ import Future = require('fibers/future');
 
 export const env = process.env;
 
+export const hacks: {
+	wrtc: any
+} = {
+	wrtc: undefined,
+}
+
 /**
  * On Start
  */

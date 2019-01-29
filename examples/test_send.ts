@@ -4,7 +4,7 @@ import * as loops from '../lib/loops';
 import * as netsimple from '../lib/netsimple';
 
 _core.main(() => {
-    netsimple.init();
+    netsimple.start();
     loops.forever(() => {
         console.log("Message every 2");
         loops.pause(2000);
@@ -16,5 +16,5 @@ _core.main(() => {
 
     netsimple.waitForConnection(_core.env.PEER_ID);
     
-    netsimple.sendString(_core.env.PEER_ID, "Hello world!");
+    netsimple.sendString("Hello world!", _core.env.PEER_ID);
 });

@@ -40,7 +40,20 @@ function wireConnEvents(channel: RTCDataChannel, otherID: string): void {
     }
 }
 
-export function init(id?: string) {
+// Really just have to mask this function...
+export function initialize() {
+    return;
+}
+
+export function start() {
+    _join();
+}
+
+export function joinAs(id: string) {
+    _join(id);
+}
+
+function _join(id?: string) {
     if (!initialized) {
         initialized = true;
         const gqlURL = new URL(env.GRAPHQL_URL);
@@ -73,7 +86,7 @@ export function waitForConnection(peer: string): void {
     _await(client.openDataChannel(COMM_NAME, peer));
 }
 
-export function sendString(peer: string, message: string) {
+export function sendString(message: string, peer: string) {
     const channel = connections[peer];
     if (channel) {
         channel.send(message);

@@ -2,7 +2,7 @@ import { SignalingClient } from 'dss-client';
 import { URL } from 'url';
 import uuidv4 = require('uuid/v4');
 
-import { _await, _detach, env } from './core-exec';
+import { _await, _detach, env, hacks } from './core-exec';
 
 import { log } from './console';
 
@@ -63,6 +63,7 @@ function _join(id?: string) {
             id: id || uuidv4(),
             port: parseInt(gqlURL.port, 10),
             secure: gqlURL.protocol === "https",
+            webRTCImplementation: hacks.wrtc,
             webRTCOptions: {
                 peerOptions: {}
             }

@@ -65,7 +65,16 @@ function _join(id?: string) {
             secure: gqlURL.protocol === "https",
             webRTCImplementation: hacks.wrtc,
             webRTCOptions: {
-                peerOptions: {}
+                peerOptions: {
+                    iceServers: [
+                        {urls: [
+                            'stuns:stun1.l.google.com:19302',
+                            'stuns:stun2.l.google.com:19302',
+                            'stuns:stun3.l.google.com:19302',
+                            'stuns:stun4.l.google.com:19302']
+                        }
+                    ]
+                }
             }
         });
         client.on('CONN_OPEN', (args) => {

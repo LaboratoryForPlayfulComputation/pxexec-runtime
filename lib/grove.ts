@@ -1,4 +1,5 @@
 import { GrovePi } from 'node-grovepi';
+import { _detach } from './core-exec';
 import * as loops from './loops';
 
 // Type aliases
@@ -101,15 +102,14 @@ export function ledOff(port: number) {
 }
 
 // Ultrasonic Ranger
-// export function pollUltrasonicRanger(port: number) {
-//     const ultrasonicSensor = createOrGetSensor(port, PortType.ULTRASONIC) as UltrasonicDigitalSensor;
+export function pollUltrasonicRanger(port: number, handler: (value: number) => void) {
+    const ultrasonicSensor = createOrGetSensor(port, PortType.ULTRASONIC) as UltrasonicDigitalSensor;
 
-//     // tslint:disable-next-line:variable-name
-//     ultrasonicSensor.on('change', (_res: any) => {
-//         // Do on Change
-//     })
-//     ultrasonicSensor.watch()
-// }
+    ultrasonicSensor.on('change', (value: any) => {
+        _detach(() => handler(value));
+    })
+    ultrasonicSensor.watch()
+}
 
 // Button
 export function pollLongButtonPress(port: number, handler: () => void) {
@@ -117,7 +117,7 @@ export function pollLongButtonPress(port: number, handler: () => void) {
 
     buttonSensor.on('down', (res: string) => {
         if ('longpress' === res) {
-            handler();
+            _detach(handler);
         }
     })
     buttonSensor.watch();
@@ -128,7 +128,7 @@ export function pollShortButtonPress(port: number, handler: () => void) {
 
     buttonSensor.on('down', (res: string) => {
         if ('longpress' !== res) {
-            handler();
+            _detach(handler);
         }
     })
     buttonSensor.watch();

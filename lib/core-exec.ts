@@ -1,38 +1,26 @@
-export interface IEventDescription {
-	predicate: () => boolean,
-	handler: () => void
+import Fiber = require('fibers');
+import Future = require('fibers/future');
+
+export const env = process.env;
+
+/**
+ * On Start
+ */
+export function main(body: () => void) {
+	Fiber(body).run();
 }
 
-let foreverFunctions: Array<() => void>;
-
-let events: { [k: string]: IEventDescription };
-
-export function init() {
-	foreverFunctions = [];
-	events = {};
+export function _detach(body: () => void) {
+	(Future as any).task(body).detach();
 }
 
-export function add_forever(func: () => void) {
-	foreverFunctions.push(func);
+export function _await<T>(task: Promise<T>): T {
+	const fiber = Fiber.current;
+	let r: T;
+	task.then((val: T) => {
+		r = val;
+		fiber.run();
+	});
+	Fiber.yield();
+	return r;
 }
-
-export function register_event(eventId: string, event: IEventDescription) {
-	events[eventId] = event;
-}
-
-export function run() {
-	while (true) {
-		for (const f of foreverFunctions) {
-			f();
-		}
-		for (const key in events) {
-			if (events.hasOwnProperty(key)) {
-				const ev = events[key];
-				if (ev.predicate()) {
-					ev.handler();
-				}
-			}
-		}
-	}
-}
-

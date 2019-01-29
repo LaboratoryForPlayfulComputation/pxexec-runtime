@@ -1,5 +1,4 @@
-/built
-/decl
+/dist
 node_modules/
 
 *.swp

@@ -1,8 +1,7 @@
 {
   "name": "pxexec-runtime",
   "version": "1.0.0",
-  "description": "Runtime support libraries for Node.js PXT execution.",
-  "main": "main.js",
+  "description": "Runtime support libraries for BlockyTalky 3",
   "directories": {
     "lib": "lib"
   },
@@ -14,12 +13,17 @@
     "url": "https://github.com/LaboratoryForPlayfulComputation/pxexec-runtime"
   },
   "author": "Laboratory for Playful Computation",
-  "license": "LGPL-3.0",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@types/node": "^10.5.2",
+    "@types/node": "^10.10.1",
+    "@types/node-fibers": "0.0.28",
+    "@types/uuid": "^3.4.4",
     "tslint-config-prettier": "^1.15.0"
   },
   "dependencies": {
-    "node-grovepi": "^2.2.2"
+    "dss-client": "file:../dss/client",
+    "fibers": "^3.1.1",
+    "node-grovepi": "^2.2.2",
+    "uuid": "^3.3.2"
   }
 }

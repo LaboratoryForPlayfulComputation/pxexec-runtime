@@ -1,13 +1,18 @@
-import * as _pxexec from './core-exec';
+import { _await, _detach } from './core-exec';
 
 export function pause(ms: number) {
-	const waitTil = new Date(new Date().getTime() + ms);
-
-	while (new Date() < waitTil) {
-		// This is a spinlock, and it blocks the entire application
-	}
+	_await(new Promise((resolve, _) => {
+		setTimeout(() => {
+			resolve();
+		}, ms);
+	}));
 }
 
 export function forever(h: () => void) {
-	_pxexec.add_forever(h);
+	const eternal = (f: () => void) => {
+		while (true) {
+			f();
+		}
+	}
+	_detach(() => eternal(h));
 }

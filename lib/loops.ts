@@ -1,13 +1,11 @@
-import Fiber = require("fibers");
-import Future = require("fibers/future");
-
+import { _await, _detach } from './core-exec';
 
 export function pause(ms: number) {
-	const fiber = Fiber.current;
-	setTimeout(() => {
-		fiber.run();
-	}, ms);
-	Fiber.yield();
+	_await(new Promise((resolve, _) => {
+		setTimeout(() => {
+			resolve();
+		}, ms);
+	}));
 }
 
 export function forever(h: () => void) {
@@ -16,7 +14,5 @@ export function forever(h: () => void) {
 			f();
 		}
 	}
-	(Future as any).task(() => {
-		eternal(h);
-	}).detach();
+	_detach(() => eternal(h));
 }

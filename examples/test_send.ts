@@ -1,12 +1,10 @@
 import * as console from '../lib/console';
 import * as _core from '../lib/core-exec';
 import * as loops from '../lib/loops';
-import * as network from '../lib/net2';
+import * as netsimple from '../lib/netsimple';
 
-import Fiber = require('fibers');
-
-Fiber(() => {
-    network.init();
+_core.main(() => {
+    netsimple.init();
     loops.forever(() => {
         console.log("Message every 2");
         loops.pause(2000);
@@ -16,6 +14,7 @@ Fiber(() => {
         loops.pause(5000);
     });
 
-    const c = network.waitForConnection(_core.env.PEER_ID);
-    c.send("Hello world!");
-}).run()
+    netsimple.waitForConnection(_core.env.PEER_ID);
+    
+    netsimple.sendString(_core.env.PEER_ID, "Hello world!");
+});

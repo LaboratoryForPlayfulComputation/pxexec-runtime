@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^10.10.1",
     "@types/node-fibers": "0.0.28",
+    "@types/onoff": "^3.2.1",
     "@types/uuid": "^3.4.4",
     "tslint-config-prettier": "^1.15.0"
   },
@@ -24,6 +25,7 @@
     "dss-client": "file:../dss/client",
     "fibers": "^3.1.1",
     "node-grovepi": "^2.2.2",
+    "onoff": "^3.2.2",
     "uuid": "^3.3.2"
   }
 }

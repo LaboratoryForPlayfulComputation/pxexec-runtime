@@ -5,6 +5,8 @@ import { google } from 'googleapis';
 
 import { log } from './console';
 
+import { _await } from './core-exec';
+
 
 let token: any;
 let credentials: any;
@@ -63,37 +65,41 @@ export class Spreadsheet {
     }
 
     public readRow(row: number) {
-        sheets.spreadsheets.values.get({
-            range: this.name + "!" + row + ":" + row,
-            spreadsheetId: this.spreadsheetID,
-        }, (err: any, res: any) => {
-            if (err) {
-                return log('The API returned an error: ' + err);
-            }
-            const rows = res.data.values;
-            if (rows.length) {
-                return rows;
-            } else {
-                log('No data found.');
-            }
-        });
+        return _await(new Promise((resolve, reject) => {
+            sheets.spreadsheets.values.get({
+                range: this.name + "!" + row + ":" + row,
+                spreadsheetId: this.spreadsheetID,
+            }, (err: any, res: any) => {
+                if (err) {
+                    reject('The API returned an error: ' + err);
+                }
+                const rows = res.data.values;
+                if (rows.length) {
+                    resolve(rows);
+                } else {
+                    reject('No data found.');
+                }
+            });
+        }));
     }
 
     public readCell(cell: string) {
-        sheets.spreadsheets.values.get({
-            range: this.name + "!" + cell,
-            spreadsheetId: this.spreadsheetID,
-        }, (err: any, res: any) => {
-            if (err) {
-                return log('The API returned an error: ' + err);
-            }
-            const rows = res.data.values;
-            if (rows.length) {
-                return rows;
-            } else {
-                log('No data found.');
-            }
-        });
+        return _await(new Promise((resolve, reject) => {
+            sheets.spreadsheets.values.get({
+                range: this.name + "!" + cell,
+                spreadsheetId: this.spreadsheetID,
+            }, (err: any, res: any) => {
+                if (err) {
+                    reject('The API returned an error: ' + err);
+                }
+                const rows = res.data.values;
+                if (rows.length) {
+                    resolve(rows);
+                } else {
+                    reject('No data found.');
+                }
+            });
+        }));
     }
 
     public appendRow(row: string[]) {

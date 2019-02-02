@@ -34,6 +34,20 @@ export function initialize() {
     return;
 }
 
+/*
+
+function getNewToken(oAuth2Client) {
+
+    const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+
+    const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES,
+    });
+
+}
+*/
+
 // Exported Class Spreadsheet
 //   Methods to append row
 //   Clear Sheet
@@ -51,17 +65,19 @@ export class Spreadsheet {
     }
 
     public clear() {
-        sheets.spreadsheets.values.clear({
-            range: this.name,
-            spreadsheetId: this.spreadsheetID,
-        }, (err: any, result: any) => {
-            if (err) {
-                // Handle error.
-                // console.log(err);
-            } else {
-                // console.log(`${result.data} cells cleared.`);
-            }
-        });
+        return _await(new Promise((resolve, reject) => {
+            sheets.spreadsheets.values.clear({
+                range: this.name,
+                spreadsheetId: this.spreadsheetID,
+            }, (err: any, result: any) => {
+                if (err) {
+                    // Handle error.
+                    reject(err);
+                } else {
+                    resolve(`${result.data} cells cleared.`);
+                }
+            });
+        }));
     }
 
     public readRow(row: number) {
@@ -103,23 +119,25 @@ export class Spreadsheet {
     }
 
     public appendRow(row: string[]) {
-        const values = row;
-        const resource = {
-            values,
-        };
-        sheets.spreadsheets.values.append({
-            range: this.name,
-            resource,
-            spreadsheetId: this.spreadsheetID,
-            valueInputOption: 'RAW',
-        }, (err: any, result: any) => {
-            if (err) {
-                // Handle error.
-                log(err);
-            } else {
-                log(`${result.data.updates.updatedCells} cells appended.`);
-            }
-        });
+        return _await(new Promise((resolve, reject) => {
+            const values = row;
+            const resource = {
+                values,
+            };
+            sheets.spreadsheets.values.append({
+                range: this.name,
+                resource,
+                spreadsheetId: this.spreadsheetID,
+                valueInputOption: 'RAW',
+            }, (err: any, result: any) => {
+                if (err) {
+                    // Handle error.
+                    reject(err);
+                } else {
+                    resolve(`${result.data.updates.updatedCells} cells appended.`);
+                }
+            });
+        }));
     }
 }
 

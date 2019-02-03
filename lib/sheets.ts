@@ -144,29 +144,30 @@ export class Spreadsheet {
 
 // Factory method to create spreadsheet by name, return spreadsheet class
 export function createSheet(name: string) {
+    return _await(new Promise((resolve, reject) => {
+        let newID: string;
 
-    let newID: string;
+        const resource = {
+            properties: {
+                title: name
+            },
+        };
 
-    const resource = {
-        properties: {
-            title: name
-        },
-    };
+        sheets.spreadsheets.create({
+            fields: 'spreadsheetId',
+            resource,
+        }, (err: any, spreadsheet: any) => {
+            if (err) {
+                // Handle error.
+                reject(err);
+            } else {
+                log(spreadsheet.data.spreadsheetId)
+                newID = spreadsheet.data.spreadsheetId;
+            }
+        });
 
-    sheets.spreadsheets.create({
-        fields: 'spreadsheetId',
-        resource,
-    }, (err: any, spreadsheet: any) => {
-        if (err) {
-            // Handle error.
-            log(err);
-        } else {
-            log(spreadsheet.data.spreadsheetId)
-            newID = spreadsheet.data.spreadsheetId;
-        }
-    });
-
-    return new Spreadsheet(newID, name);
+        resolve(new Spreadsheet(newID, name));
+    }));
 }
 
 // Factory method to get spreadsheet from ID, return spreadsheet class

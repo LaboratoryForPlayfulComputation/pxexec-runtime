@@ -34,38 +34,30 @@ export function initialize() {
     return;
 }
 
-/*
-
-function getNewToken(oAuth2Client) {
-
-    const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-
-    const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-    });
-
-}
-*/
-
-// Exported Class Spreadsheet
-//   Methods to append row
-//   Clear Sheet
-//   Read Row
-//   Read Cell
-
+/** Class representing a google spreadsheet. */
 export class Spreadsheet {
 
     private spreadsheetID: string;
     private name: string;
 
+    /**
+     * Creates an instance of Spreadsheet.
+     *
+     * @constructor
+     * @this {Spreadsheet}
+     * @param {string} spreadsheetID unique ID of spreadsheet
+     * @param {string} name name of sheet inside
+     */
     constructor(spreadsheetID: string, name: string) {
         this.spreadsheetID = spreadsheetID;
         this.name = name;
     }
 
-    public clear() {
-        return _await(new Promise((resolve, reject) => {
+    /**
+     * Clear all the spreadsheet values.
+     */
+    public clear(): void {
+        _await(new Promise((resolve, reject) => {
             sheets.spreadsheets.values.clear({
                 range: this.name,
                 spreadsheetId: this.spreadsheetID,
@@ -74,13 +66,19 @@ export class Spreadsheet {
                     // Handle error.
                     reject(err);
                 } else {
-                    resolve(`${result.data} cells cleared.`);
+                    log(`${result.data} cells cleared.`)
+                    resolve();
                 }
             });
         }));
     }
 
-    public readRow(row: number) {
+    /**
+     * Read one row of the spreadsheet.
+     * @param {number} row row number to be read.
+     * @return {string[]} values in the row.
+     */
+    public readRow(row: number): string[] {
         return _await(new Promise((resolve, reject) => {
             sheets.spreadsheets.values.get({
                 range: this.name + "!" + row + ":" + row,
@@ -89,6 +87,7 @@ export class Spreadsheet {
                 if (err) {
                     reject('The API returned an error: ' + err);
                 }
+                // Array of returned values
                 const rows = res.data.values;
                 if (rows.length) {
                     resolve(rows);
@@ -99,7 +98,12 @@ export class Spreadsheet {
         }));
     }
 
-    public readCell(cell: string) {
+    /**
+     * Read one row of the spreadsheet.
+     * @param {string} cell cell to be read in A1 notation.
+     * @return {string[]} value in the cell.
+     */
+    public readCell(cell: string): string[] {
         return _await(new Promise((resolve, reject) => {
             sheets.spreadsheets.values.get({
                 range: this.name + "!" + cell,
@@ -108,6 +112,7 @@ export class Spreadsheet {
                 if (err) {
                     reject('The API returned an error: ' + err);
                 }
+                // Array containing single returned values
                 const rows = res.data.values;
                 if (rows.length) {
                     resolve(rows);
@@ -118,8 +123,12 @@ export class Spreadsheet {
         }));
     }
 
-    public appendRow(row: string[]) {
-        return _await(new Promise((resolve, reject) => {
+    /**
+     * Clear all the spreadsheet values.
+     * @param {string[]} row row of values to append to spreadsheet.
+     */
+    public appendRow(row: string[]): void {
+        _await(new Promise((resolve, reject) => {
             const values = row;
             const resource = {
                 values,
@@ -134,7 +143,8 @@ export class Spreadsheet {
                     // Handle error.
                     reject(err);
                 } else {
-                    resolve(`${result.data.updates.updatedCells} cells appended.`);
+                    log(`${result.data.updates.updatedCells} cells appended.`)
+                    resolve();
                 }
             });
         }));
@@ -143,7 +153,7 @@ export class Spreadsheet {
 
 
 // Factory method to create spreadsheet by name, return spreadsheet class
-export function createSheet(name: string) {
+export function createSheet(name: string): Spreadsheet {
     return _await(new Promise((resolve, reject) => {
         let newID: string;
 
@@ -171,6 +181,6 @@ export function createSheet(name: string) {
 }
 
 // Factory method to get spreadsheet from ID, return spreadsheet class
-export function getSheet(id: string, name: string) {
+export function getSheet(id: string, name: string): Spreadsheet {
     return new Spreadsheet(id, name);
 }

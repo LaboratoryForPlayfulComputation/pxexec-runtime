@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { env } from "./core-exec";
 
 import { google } from 'googleapis';
+import { OAuth2Client } from "googleapis-common";
 
 import { log } from './console';
 
@@ -11,8 +12,10 @@ import { _await } from './core-exec';
 let token: any;
 let credentials: any;
 
-let oAuth2Client: any;
+let oAuth2Client: OAuth2Client;
 let sheets: any;
+
+const SHEET_NAME = 'Sheet1';
 
 // parse token.js and credentials.js
 export function initialize() {
@@ -29,7 +32,7 @@ export function initialize() {
     oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
     oAuth2Client.setCredentials(token);
 
-    sheets = google.sheets({ version: 'v4', oAuth2Client });
+    sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
 
     return;
 }
@@ -38,7 +41,8 @@ export function initialize() {
 export class Spreadsheet {
 
     private spreadsheetID: string;
-    private name: string;
+    // tslint:disable-next-line:variable-name
+    private _title: string;
 
     /**
      * Creates an instance of Spreadsheet.
@@ -46,11 +50,18 @@ export class Spreadsheet {
      * @constructor
      * @this {Spreadsheet}
      * @param {string} spreadsheetID unique ID of spreadsheet
-     * @param {string} name name of sheet inside
+     * @param {string} title title of sheet inside
      */
-    constructor(spreadsheetID: string, name: string) {
+    constructor(spreadsheetID: string, title: string) {
         this.spreadsheetID = spreadsheetID;
-        this.name = name;
+        this._title = title;
+    }
+
+    /**
+     * Get title value
+     */
+    get title(): string {
+        return this._title;
     }
 
     /**
@@ -59,7 +70,7 @@ export class Spreadsheet {
     public clear(): void {
         _await(new Promise((resolve, reject) => {
             sheets.spreadsheets.values.clear({
-                range: this.name,
+                range: SHEET_NAME,
                 spreadsheetId: this.spreadsheetID,
             }, (err: any, result: any) => {
                 if (err) {
@@ -81,7 +92,7 @@ export class Spreadsheet {
     public readRow(row: number): string[] {
         return _await(new Promise((resolve, reject) => {
             sheets.spreadsheets.values.get({
-                range: this.name + "!" + row + ":" + row,
+                range: SHEET_NAME + "!" + row + ":" + row,
                 spreadsheetId: this.spreadsheetID,
             }, (err: any, res: any) => {
                 if (err) {
@@ -103,10 +114,10 @@ export class Spreadsheet {
      * @param {string} cell cell to be read in A1 notation.
      * @return {string[]} value in the cell.
      */
-    public readCell(cell: string): string[] {
+    public readCell(cell: string): string {
         return _await(new Promise((resolve, reject) => {
             sheets.spreadsheets.values.get({
-                range: this.name + "!" + cell,
+                range: SHEET_NAME + "!" + cell,
                 spreadsheetId: this.spreadsheetID,
             }, (err: any, res: any) => {
                 if (err) {
@@ -114,8 +125,8 @@ export class Spreadsheet {
                 }
                 // Array containing single returned values
                 const rows = res.data.values;
-                if (rows.length) {
-                    resolve(rows);
+                if (rows[0] && rows[0][0]) {
+                    resolve(rows[0][0] as string);
                 } else {
                     reject('No data found.');
                 }
@@ -129,12 +140,11 @@ export class Spreadsheet {
      */
     public appendRow(row: string[]): void {
         _await(new Promise((resolve, reject) => {
-            const values = row;
             const resource = {
-                values,
+                values: [row],
             };
             sheets.spreadsheets.values.append({
-                range: this.name,
+                range: SHEET_NAME,
                 resource,
                 spreadsheetId: this.spreadsheetID,
                 valueInputOption: 'RAW',
@@ -153,13 +163,13 @@ export class Spreadsheet {
 
 
 // Factory method to create spreadsheet by name, return spreadsheet class
-export function createSheet(name: string): Spreadsheet {
+export function createSheet(title: string): Spreadsheet {
     return _await(new Promise((resolve, reject) => {
         let newID: string;
 
         const resource = {
             properties: {
-                title: name
+                title
             },
         };
 
@@ -173,19 +183,18 @@ export function createSheet(name: string): Spreadsheet {
             } else {
                 log(spreadsheet.data.spreadsheetId)
                 newID = spreadsheet.data.spreadsheetId;
+                resolve(new Spreadsheet(newID, title));
             }
         });
-
-        resolve(new Spreadsheet(newID, name));
     }));
 }
 
 // Factory method to get spreadsheet from ID, return spreadsheet class
-export function getSheet(id: string, name: string): Spreadsheet {
+export function getSheet(id: string): Spreadsheet {
     return _await(new Promise((resolve, reject) => {
-        sheets.spreadsheets.values.get({
+        sheets.spreadsheets.get({
             includeGridData: false,
-            range: [],
+            ranges: [],
             spreadsheetId: id,
         }, (err: any, res: any) => {
             if (err) {
@@ -193,8 +202,8 @@ export function getSheet(id: string, name: string): Spreadsheet {
             }
             else {
                 // Get name from response
-                name = res.data.properties.title;
-                resolve(new Spreadsheet(id, name))
+                const title = res.data.properties.title;
+                resolve(new Spreadsheet(id, title))
             }
         });
     }));

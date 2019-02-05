@@ -182,5 +182,20 @@ export function createSheet(name: string): Spreadsheet {
 
 // Factory method to get spreadsheet from ID, return spreadsheet class
 export function getSheet(id: string, name: string): Spreadsheet {
-    return new Spreadsheet(id, name);
+    return _await(new Promise((resolve, reject) => {
+        sheets.spreadsheets.values.get({
+            includeGridData: false,
+            range: [],
+            spreadsheetId: id,
+        }, (err: any, res: any) => {
+            if (err) {
+                reject('The API returned an error: ' + err);
+            }
+            else {
+                // Get name from response
+                name = res.data.properties.title;
+                resolve(new Spreadsheet(id, name))
+            }
+        });
+    }));
 }

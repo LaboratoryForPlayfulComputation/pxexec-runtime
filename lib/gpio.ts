@@ -1,8 +1,19 @@
 import { Gpio } from 'onoff';
 import { _detach } from './core-exec';
 
+let allPins: { [k: string]: Gpio };
+
+function lazyPin(pin: Pins): Gpio {
+    let p = allPins[pin];
+    if (!p) {
+        p = new Gpio(pin, Direction.INPUT);
+        allPins[pin] = p;
+    }
+    return p;
+}
+
 export function initialize() {
-    return;
+    allPins = {};
 }
 
 export enum Direction {
@@ -20,32 +31,32 @@ export enum Edge {
 }
 
 // tslint:disable:object-literal-sort-keys
-export const Pins = {
-    PIN2: new Gpio(2, Direction.INPUT),
-    PIN3: new Gpio(3, Direction.INPUT),
-    PIN4: new Gpio(4, Direction.INPUT),
-    PIN5: new Gpio(5, Direction.INPUT),
-    PIN6: new Gpio(6, Direction.INPUT),
-    PIN7: new Gpio(7, Direction.INPUT),
-    PIN8: new Gpio(8, Direction.INPUT),
-    PIN9: new Gpio(9, Direction.INPUT),
-    PIN10: new Gpio(10, Direction.INPUT),
-    PIN11: new Gpio(11, Direction.INPUT),
-    PIN12: new Gpio(12, Direction.INPUT),
-    PIN13: new Gpio(13, Direction.INPUT),
-    PIN14: new Gpio(14, Direction.INPUT),
-    PIN15: new Gpio(15, Direction.INPUT),
-    PIN16: new Gpio(16, Direction.INPUT),
-    PIN17: new Gpio(17, Direction.INPUT),
-    PIN18: new Gpio(18, Direction.INPUT),
-    PIN19: new Gpio(19, Direction.INPUT),
-    PIN20: new Gpio(20, Direction.INPUT),
-    PIN21: new Gpio(21, Direction.INPUT),
-    PIN22: new Gpio(22, Direction.INPUT),
-    PIN23: new Gpio(23, Direction.INPUT),
-    PIN24: new Gpio(24, Direction.INPUT),
-    PIN25: new Gpio(25, Direction.INPUT),
-    PIN26: new Gpio(26, Direction.INPUT),
+export enum Pins {
+    PIN2 = 2,
+    PIN3 = 3,
+    PIN4 = 4,
+    PIN5 = 5,
+    PIN6 = 6,
+    PIN7 = 7,
+    PIN8 = 8,
+    PIN9 = 9,
+    PIN10 = 10,
+    PIN11 = 11,
+    PIN12 = 12,
+    PIN13 = 13,
+    PIN14 = 14,
+    PIN15 = 15,
+    PIN16 = 16,
+    PIN17 = 17,
+    PIN18 = 18,
+    PIN19 = 19,
+    PIN20 = 20,
+    PIN21 = 21,
+    PIN22 = 22,
+    PIN23 = 23,
+    PIN24 = 24,
+    PIN25 = 25,
+    PIN26 = 26,
 }
 
 export enum PinState {
@@ -53,54 +64,55 @@ export enum PinState {
     HIGH = 1
 }
 
-export function read(pin: Gpio): number {
-    return pin.readSync();
+export function read(pin: Pins): number {
+    return lazyPin(pin).readSync();
 }
 
-export function write(pin: Gpio, value: PinState): void {
-    pin.writeSync(value);
+export function write(pin: Pins, value: PinState): void {
+    lazyPin(pin).writeSync(value);
 }
 
-export function setDirection(pin: Gpio, direction: Direction): void {
-    pin.setDirection(direction);
+export function setDirection(pin: Pins, direction: Direction): void {
+    lazyPin(pin).setDirection(direction);
 }
 
-export function setEdge(pin: Gpio, edge: Edge): void {
-    pin.setEdge(edge);
+export function setEdge(pin: Pins, edge: Edge): void {
+    lazyPin(pin).setEdge(edge);
 }
 
-export function setActiveLow(pin: Gpio): void {
-    pin.setActiveLow(true);
+export function setActiveLow(pin: Pins): void {
+    lazyPin(pin).setActiveLow(true);
 }
 
-export function setActiveHigh(pin: Gpio): void {
-    pin.setActiveLow(false);
+export function setActiveHigh(pin: Pins): void {
+    lazyPin(pin).setActiveLow(false);
 }
 
-function addWatchToPin(pin: Gpio, handler: any, edge?: Edge) {
+function addWatchToPin(pin: Pins, handler: any, edge?: Edge) {
+    const p = lazyPin(pin);
     if (edge) {
-        pin.setDirection(Direction.INPUT);
-        pin.setEdge(Edge.FALLING);
+        p.setDirection(Direction.INPUT);
+        p.setEdge(Edge.FALLING);
     }
-    pin.watch((err, val) => {
+    p.watch((err, val) => {
         if (!err) {
-            _detach(handler);
+            _detach(() => { handler(val) });
         }
     })
 }
 
-export function onPinHighToLow(pin: Gpio, handler: () => void): void {
+export function onPinHighToLow(pin: Pins, handler: () => void): void {
     addWatchToPin(pin, handler, Edge.FALLING);
 }
 
-export function onPinLowToHigh(pin: Gpio, handler: () => void): void {
+export function onPinLowToHigh(pin: Pins, handler: () => void): void {
     addWatchToPin(pin, handler, Edge.RISING);
 }
 
-export function onPinChange(pin: Gpio, handler: (newvalue: PinState) => void): void {
+export function onPinChange(pin: Pins, handler: (newvalue: PinState) => void): void {
     addWatchToPin(pin, handler, Edge.BOTH);
 }
 
-export function watch(pin: Gpio, handler: (newvalue: PinState) => void): void {
+export function watch(pin: Pins, handler: (newvalue: PinState) => void): void {
     addWatchToPin(pin, handler);
 }

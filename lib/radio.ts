@@ -5,10 +5,10 @@ import { _await, _detach } from './core-exec';
 
 let serial: any;
 
-interface IKeyValuePair { key: string, value: number }
+type KeyValuePair = [string, number];
 type Handler<T> = (x: T) => void;
 const numHandlers: Array<Handler<number>> = [];
-const keyValueHandlers: Array<Handler<IKeyValuePair>> = [];
+const keyValueHandlers: Array<Handler<KeyValuePair>> = [];
 const stringHandlers: Array<Handler<string>> = []
 
 
@@ -47,7 +47,7 @@ export function initialize() {
                 stringHandlers.forEach((h) => _detach(() => h(parsedData.value as string)))
                 break;
             case "keyvalue":
-                keyValueHandlers.forEach((h) => _detach(() => h(parsedData.value as IKeyValuePair)))
+                keyValueHandlers.forEach((h) => _detach(() => h(parsedData.value as KeyValuePair)))
                 break;
         }
 
@@ -60,7 +60,7 @@ interface IPacket {
     serial: number,
     signal: number,
     time: number,
-    value: number | string | IKeyValuePair,
+    value: number | string | KeyValuePair,
 }
 
 
@@ -68,7 +68,7 @@ export function onReciveNumber(handler: Handler<number>): void {
     numHandlers.push(handler);
 }
 
-export function onReciveKeyValue(handler: Handler<IKeyValuePair>): void {
+export function onReciveKeyValue(handler: Handler<KeyValuePair>): void {
     keyValueHandlers.push(handler);
 }
 

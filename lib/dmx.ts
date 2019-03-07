@@ -84,21 +84,6 @@ export function send(): void {
     // send dmx
 }
 
-export function colors(color: Colors): number {
-    return color;
-}   
-
-export function rgb(red: number, green: number, blue: number): number {
-    return ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | (blue & 0xFF);
-}
-
-export function hexToRgb(hex: number): Array<number> {
-    let r = (hex >> 16) & 255;
-    let g = (hex >> 8) & 255;
-    let b = hex & 255;
-    return [r, g, b];
-}
-
 export function findFixtureByName(name: string) : Fixture {
     for (let i = 0; i < allFixtures.length; i++){
         let fixture = allFixtures[i];

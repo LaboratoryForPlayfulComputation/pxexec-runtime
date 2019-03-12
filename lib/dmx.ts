@@ -44,6 +44,7 @@ export function initialize() {
     const universe = dmx.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
     //const universe = dmx.addUniverse(universeName, 'null');
     log(universe);
+    console.log(universe);
     return;
 }
 
@@ -85,6 +86,7 @@ export function generateDMXJson() : any {
         }
     }
     log(dmxChannels);
+    console.log(dmxChannels);
     return dmxChannels;
 }
 

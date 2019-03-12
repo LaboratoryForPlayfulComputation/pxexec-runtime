@@ -8,6 +8,6 @@ declare module 'dmx' {
             public update(universe: string, channels: Object): void;
             public updateAll(universe: string, value: number): void;
             public universeToObject(universeKey: string): Object;
-        }        
+        }      
     }
 }

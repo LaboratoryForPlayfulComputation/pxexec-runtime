@@ -6,7 +6,7 @@ import { _await } from './core-exec';
 
 let allFixtures  : Array<Fixture> = [];
 let universeName : string = 'pidmx';
-let dmx : Dmx.DMX;
+let dmx : Dmx.DMX | undefined;
 
 /* 
  * Class to store information about a fixture's channels.
@@ -40,11 +40,15 @@ export class Channel {
 
 export function initialize() {
     dmx = new Dmx.DMX();
-    // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
-    const universe = dmx.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
-    //const universe = dmx.addUniverse(universeName, 'null');
-    log(universe);
-    console.log(universe);
+
+    if (dmx) {
+        // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
+        const universe = dmx.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
+        //const universe = dmx.addUniverse(universeName, 'null');
+        log("initialized dmx universe");
+    } else {
+        log("unable to initialize dmx universe");
+    }
     return;
 }
 
@@ -54,16 +58,19 @@ export function initialize() {
  * for the layour editor extension
  */
 export function createFixture(name: string, numChannels: number) : void {
+    log("Creating dmx fixture");
     allFixtures.push(new Fixture(name, numChannels));
 }
 
 export function updateFixtureChannel(name: string, channel: number, value: number) { 
+    log("Updating fixture " + name + "'s channel " + channel.toString() + " to " + value.toString());    
     let fixture = findFixtureByName(name);
     if (fixture) fixture.channels[channel].value = value;
 }
 
 /* Send the updated channel information to the DMX controller */
 export function send() : void {
+    log("Sending updated dmx info to controller");
     dmx.update(universeName, generateDMXJson());
 }
 
@@ -86,7 +93,6 @@ export function generateDMXJson() : any {
         }
     }
     log(dmxChannels);
-    console.log(dmxChannels);
     return dmxChannels;
 }
 

@@ -45,6 +45,7 @@ export function initialize() {
         // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
         const universe = dmx.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
         //const universe = dmx.addUniverse(universeName, 'null');
+        log(universe);
         log("initialized dmx universe");
     } else {
         log("unable to initialize dmx universe");

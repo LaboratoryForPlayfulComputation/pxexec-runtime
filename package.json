@@ -23,6 +23,8 @@
   "dependencies": {
     "dss-client": "file:../dss/client",
     "fibers": "^3.1.1",
+    "googleapis": "^37.2.0",
+    "googleapis-common": "^0.7.2",
     "node-grovepi": "^2.2.2",
     "uuid": "^3.3.2"
   }

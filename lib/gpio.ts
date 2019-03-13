@@ -1,7 +1,16 @@
 import { Gpio } from 'onoff';
-import { _detach } from './core-exec';
+import { _detach, onExit } from './core-exec';
 
-let allPins: { [k: string]: Gpio };
+const allPins: { [k: string]: Gpio } = {};
+
+
+onExit(() => {
+    Object.keys(allPins).forEach((k) => {
+        if (allPins.hasOwnProperty(k)) {
+            allPins[k].unexport();
+        }
+    });
+});
 
 function lazyPin(pin: Pins): Gpio {
     let p = allPins[pin];
@@ -10,10 +19,6 @@ function lazyPin(pin: Pins): Gpio {
         allPins[pin] = p;
     }
     return p;
-}
-
-export function initialize() {
-    allPins = {};
 }
 
 export enum Direction {

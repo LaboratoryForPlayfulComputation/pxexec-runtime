@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { env } from "./core-exec";
+import { env, onInit } from "./core-exec";
 
 import { google } from 'googleapis';
 import { OAuth2Client } from "googleapis-common";
@@ -18,7 +18,7 @@ let sheets: any;
 const SHEET_NAME = 'Sheet1';
 
 // parse token.js and credentials.js
-export function initialize() {
+onInit(() => {
     const tokenPath = env.GOOGLE_TOKEN_PATH;
     const credPath = env.GOOGLE_CREDENTIAL_PATH;
 
@@ -35,7 +35,7 @@ export function initialize() {
     sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
 
     return;
-}
+});
 
 /** Class representing a google spreadsheet. */
 export class Spreadsheet {

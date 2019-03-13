@@ -3,8 +3,6 @@ import * as _core from '../lib/core-exec';
 import * as sheets from '../lib/sheets';
 
 _core.main(() => {
-    sheets.initialize();
-
     const sheet = sheets.getSheet("1FcfEth7aMtUG1MbU9h_uEIoaHMS9tQq0zJryIAroZpE");
     // sheet.clear();
 

@@ -1,12 +1,14 @@
-import { dmx } from 'dmx';
+import DMX = require('dmx');
 
 import { log } from './console';
 
 import { _await } from './core-exec';
 
+
 let allFixtures  : Array<Fixture> = [];
 let universeName : string = 'pidmx';
-let dmxController : dmx.DMX | undefined;
+let dmxController : DMX | undefined;
+//let universe : any;
 
 /* 
  * Class to store information about a fixture's channels.
@@ -30,6 +32,25 @@ export class Fixture {
     }
 }
 
+export class RGBFixture extends Fixture {
+    public name : string;
+    public numChannels : number;
+    public channels : Array<Channel>;
+
+    constructor(fixtureName : string, numberChannels : number) {
+        super(fixtureName, numberChannels);
+        this.name = fixtureName;
+        this.channels = [];
+        this.numChannels = numberChannels;
+        let i = 0;
+        while (i < this.numChannels) {
+            let channel = new Channel();
+            this.channels.push(channel);
+            i++;
+        }
+    }
+}
+
 export class Channel {
     public value : number;
 
@@ -39,13 +60,13 @@ export class Channel {
 }
 
 export function initialize() {
-    dmxController = new dmx.DMX();
+    dmxController = new DMX();
 
-    if (dmx) {
+    if (dmxController) {
         // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
-        const universe = dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
+        //universe = dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
+        dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
         //const universe = dmx.addUniverse(universeName, 'null');
-        log(universe);
         log("initialized dmx universe");
     } else {
         log("unable to initialize dmx universe");
@@ -56,17 +77,32 @@ export function initialize() {
 /* Method to create new DMX fixture
  * The order that the fixtures are declared needs to match the way
  * the rig is physically wired. This will change once we add support
- * for the layour editor extension
+ * for the layout editor extension
  */
 export function createFixture(name: string, numChannels: number) : void {
     log("Creating dmx fixture");
     allFixtures.push(new Fixture(name, numChannels));
 }
 
+/* Method to create new Prefab DMX fixture
+ * The order that the fixtures are declared needs to match the way
+ * the rig is physically wired. This will change once we add support
+ * for the layout editor extension
+ */
+export function createPrefabFixture(name: string, fixtureType: string) : void {
+    log("Creating prefab dmx fixture " + fixtureType.toString());
+    if (fixtureType == "Baisun8Channel")
+        allFixtures.push(new RGBFixture(name, 8));
+    else if (fixtureType == "Coidak8Channel")
+        allFixtures.push(new RGBFixture(name, 8));
+}
+
 export function updateFixtureChannel(name: string, channel: number, value: number) { 
     log("Updating fixture " + name + "'s channel " + channel.toString() + " to " + value.toString());    
     let fixture = findFixtureByName(name);
-    if (fixture) fixture.channels[channel].value = value;
+    if (channel > 0)
+        if (fixture) fixture.channels[channel-1].value = value;
+    else log("invalid channel number");
 }
 
 /* Send the updated channel information to the DMX controller */

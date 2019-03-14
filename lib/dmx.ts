@@ -126,7 +126,7 @@ export function generateDMXJson() : any {
         let fixture = allFixtures[i];
         for (let j = 0; j < fixture.numChannels; j++) {
             let index : number = channelCount + j;
-            dmxChannels[index as number] = fixture.channels[j];
+            dmxChannels[index as number] = fixture.channels[j].value;
         }
     }
     log(dmxChannels);

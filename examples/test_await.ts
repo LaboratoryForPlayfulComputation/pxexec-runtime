@@ -12,6 +12,6 @@ function somePromiseFunction() {
 }
 
 Fiber(() => {
-    console.log("The first message!");
-    console.log(_core._await(somePromiseFunction()));
+    console.info("The first message!");
+    console.info(_core._await(somePromiseFunction()));
 }).run()

@@ -4,7 +4,7 @@ import uuidv4 = require('uuid/v4');
 
 import { _await, _detach, env, hacks, onExit } from './core-exec';
 
-import { log } from './console';
+import { info } from './console';
 
 let client: SignalingClient;
 
@@ -83,7 +83,7 @@ function _join(id?: string) {
         client.on('CONN_OPEN', (args) => {
             const channel: RTCDataChannel = args[1];
             const otherID = args[2]
-            log("Connection opened with: " + otherID);
+            info("Connection opened with: " + otherID);
             connections[otherID] = channel;
             wireConnEvents(channel, otherID);
         });

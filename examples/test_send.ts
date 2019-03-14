@@ -6,11 +6,11 @@ import * as netsimple from '../lib/netsimple';
 _core.main(() => {
     netsimple.start();
     loops.forever(() => {
-        console.log("Message every 2");
+        console.info("Message every 2");
         loops.pause(2000);
     });
     loops.forever(() => {
-        console.log("Message every 5");
+        console.info("Message every 5");
         loops.pause(5000);
     });
 

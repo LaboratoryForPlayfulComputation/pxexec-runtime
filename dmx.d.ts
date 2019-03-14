@@ -1,6 +1,6 @@
 
 declare module 'dmx' {
-    namespace Dmx {
+    namespace dmx {
         class DMX {
             constructor();
             public registerDriver(name: string, module: string): void;

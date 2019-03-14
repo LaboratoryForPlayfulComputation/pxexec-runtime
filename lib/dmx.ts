@@ -1,4 +1,4 @@
-import { Dmx } from 'dmx';
+import { dmx } from 'dmx';
 
 import { log } from './console';
 
@@ -6,7 +6,7 @@ import { _await } from './core-exec';
 
 let allFixtures  : Array<Fixture> = [];
 let universeName : string = 'pidmx';
-let dmx : Dmx.DMX | undefined;
+let dmxController : dmx.DMX | undefined;
 
 /* 
  * Class to store information about a fixture's channels.
@@ -39,11 +39,11 @@ export class Channel {
 }
 
 export function initialize() {
-    dmx = new Dmx.DMX();
+    dmxController = new dmx.DMX();
 
     if (dmx) {
         // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
-        const universe = dmx.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
+        const universe = dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
         //const universe = dmx.addUniverse(universeName, 'null');
         log(universe);
         log("initialized dmx universe");
@@ -72,7 +72,7 @@ export function updateFixtureChannel(name: string, channel: number, value: numbe
 /* Send the updated channel information to the DMX controller */
 export function send() : void {
     log("Sending updated dmx info to controller");
-    dmx.update(universeName, generateDMXJson());
+    dmxController.update(universeName, generateDMXJson());
 }
 
 export function findFixtureByName(name: string) : Fixture {

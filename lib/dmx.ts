@@ -12,6 +12,19 @@ export enum RGBFixtureType {
     Coidak8ch
 }
 
+export enum Colors {
+    Red = 0xFF0000,
+    Orange = 0xFFA500,
+    Yellow = 0xFFFF00,
+    Green = 0x00FF00,
+    Blue = 0x0000FF,
+    Indigo = 0x4b0082,
+    Violet = 0x8a2be2,
+    Purple = 0xFF00FF,
+    White = 0xFFFFFF,
+    Black = 0x000000    
+}
+
 /* 
  * Class to store information about a fixture's channels.
  * In DMX512 you can have up to a total of 512 channels.
@@ -63,7 +76,7 @@ export class RGBFixture extends Fixture {
         this.channels[this.brightnessChannel-1].value = value;
     }        
 
-    setColor(value: string): void {
+    setColor(value: number): void {
         let rgbValues = hexToRgb(value);
         this.channels[this.redChannel-1].value = rgbValues['r'];
         this.channels[this.greenChannel-1].value = rgbValues['g'];
@@ -130,7 +143,6 @@ export function createRGBFixture(fixtureType: RGBFixtureType) : RGBFixture {
     return rgbFixture;
 }
 
-
 /* Send the updated channel information to the DMX controller */
 export function send() : void {
     log("Sending updated dmx info to controller");
@@ -152,15 +164,20 @@ export function generateDMXJson() : any {
     return dmxChannels;
 }
 
-export function hexToRgb(hex: string) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-  }
+export function colors(color: Colors): number {
+    return color;
+}
 
+export function rgb(red: number, green: number, blue: number): number {
+    return ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | (blue & 0xFF); // returns a hex number
+}
+
+export function hexToRgb(value: number) {
+    let r = (value >> 16) & 255;
+    let g = (value >> 8) & 255;
+    let b = value & 255;
+    return {r: r, g: g, b: b};
+}
 
 /* Eventually the rig editor will generate blocks like
  * "show scene", "play pattern", "loop pattern", "stop pattern"

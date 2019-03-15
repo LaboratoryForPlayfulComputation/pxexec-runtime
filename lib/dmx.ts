@@ -1,14 +1,16 @@
 import DMX = require('dmx');
-
 import { log } from './console';
-
 import { _await } from './core-exec';
 
 
 let allFixtures  : Array<Fixture> = [];
 let universeName : string = 'pidmx';
 let dmxController : DMX | undefined;
-//let universe : any;
+
+export enum RGBFixtureType {
+    Baisun8ch,
+    Coidak8ch
+}
 
 /* 
  * Class to store information about a fixture's channels.
@@ -49,7 +51,7 @@ export class RGBFixture extends Fixture {
                 this.greenChannel = 3;
                 this.blueChannel = 4;
               break;
-            default: // Coidak
+            default: // "Coidak8ch"
                 this.brightnessChannel = 4;
                 this.redChannel = 5;
                 this.greenChannel = 6;
@@ -111,12 +113,23 @@ export function createFixture(numChannels: number) : Fixture {
  * the rig is physically wired. This will change once we add support
  * for the layout editor extension
  */
-export function createRGBFixture(fixtureType: string) : RGBFixture {
-    log("Creating RGB dmx fixture " + fixtureType.toString());
-    let rgbFixture = new RGBFixture(8, fixtureType);
+export function createRGBFixture(fixtureType: RGBFixtureType) : RGBFixture {
+    let fixtureTypeName : string = "";
+    switch (fixtureType) {
+        case RGBFixtureType.Baisun8ch:
+            fixtureTypeName = "Baisun8ch";
+            break;
+        case RGBFixtureType.Coidak8ch:
+            fixtureTypeName = "Coidak8ch";
+            break;
+        default:
+            fixtureTypeName = "";
+    }
+    let rgbFixture = new RGBFixture(8, fixtureTypeName);
     allFixtures.push(rgbFixture);
     return rgbFixture;
 }
+
 
 /* Send the updated channel information to the DMX controller */
 export function send() : void {
@@ -139,12 +152,6 @@ export function generateDMXJson() : any {
     return dmxChannels;
 }
 
-/* Eventually the rig editor will generate blocks like
- * "show scene", "play pattern", "loop pattern", "stop pattern"
- * scenes -> patterns -> shows (the user can do all 3 in makecode or
- * just do the actual triggering mechanisms therefore creating a show)
- */
-
 export function hexToRgb(hex: string) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -154,6 +161,9 @@ export function hexToRgb(hex: string) {
     } : null;
   }
 
-export function fixturetype(fixture: string): string { 
-    return fixture;
-}
+
+/* Eventually the rig editor will generate blocks like
+ * "show scene", "play pattern", "loop pattern", "stop pattern"
+ * scenes -> patterns -> shows (the user can do all 3 in makecode or
+ * just do the actual triggering mechanisms therefore creating a show)
+ */

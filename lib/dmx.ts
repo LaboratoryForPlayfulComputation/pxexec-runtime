@@ -15,12 +15,10 @@ let dmxController : DMX | undefined;
  * In DMX512 you can have up to a total of 512 channels.
  */
 export class Fixture {
-    public name : string;
     public numChannels : number;
     public channels : Array<Channel>;
 
-    constructor(fixtureName : string, numberChannels : number) {
-        this.name = fixtureName;
+    constructor(numberChannels : number) {
         this.channels = [];
         this.numChannels = numberChannels;
         let i = 0;
@@ -30,25 +28,46 @@ export class Fixture {
             i++;
         }
     }
+
+    updateChannel(channel: number, value: number): void {
+        this.channels[channel-1].value = value;
+     }  
 }
 
 export class RGBFixture extends Fixture {
-    public name : string;
-    public numChannels : number;
-    public channels : Array<Channel>;
+    public brightnessChannel : number;
+    public redChannel : number;
+    public greenChannel : number;
+    public blueChannel : number;
 
-    constructor(fixtureName : string, numberChannels : number) {
-        super(fixtureName, numberChannels);
-        this.name = fixtureName;
-        this.channels = [];
-        this.numChannels = numberChannels;
-        let i = 0;
-        while (i < this.numChannels) {
-            let channel = new Channel();
-            this.channels.push(channel);
-            i++;
-        }
+    constructor(numberChannels : number, lightType : string) {
+        super(numberChannels);
+        switch(lightType) {
+            case "Baisun8ch":
+                this.brightnessChannel = 1;
+                this.redChannel = 2;
+                this.greenChannel = 3;
+                this.blueChannel = 4;
+              break;
+            default: // Coidak
+                this.brightnessChannel = 4;
+                this.redChannel = 5;
+                this.greenChannel = 6;
+                this.blueChannel = 7;
+          }
     }
+
+    setBrightness(value: number): void { 
+        this.channels[this.brightnessChannel-1].value = value;
+    }        
+
+    setColor(value: string): void {
+        let rgbValues = hexToRgb(value);
+        this.channels[this.redChannel-1].value = rgbValues['r'];
+        this.channels[this.greenChannel-1].value = rgbValues['g'];
+        this.channels[this.blueChannel-1].value = rgbValues['b'];
+
+     }       
 }
 
 export class Channel {
@@ -74,14 +93,17 @@ export function initialize() {
     return;
 }
 
+/*
 /* Method to create new DMX fixture
  * The order that the fixtures are declared needs to match the way
  * the rig is physically wired. This will change once we add support
  * for the layout editor extension
  */
-export function createFixture(name: string, numChannels: number) : void {
+export function createFixture(numChannels: number) : Fixture {
     log("Creating dmx fixture");
-    allFixtures.push(new Fixture(name, numChannels));
+    let fixture = new Fixture(numChannels)
+    allFixtures.push(fixture);
+    return fixture;
 }
 
 /* Method to create new Prefab DMX fixture
@@ -89,34 +111,17 @@ export function createFixture(name: string, numChannels: number) : void {
  * the rig is physically wired. This will change once we add support
  * for the layout editor extension
  */
-export function createPrefabFixture(name: string, fixtureType: string) : void {
-    log("Creating prefab dmx fixture " + fixtureType.toString());
-    if (fixtureType == "Baisun8Channel")
-        allFixtures.push(new RGBFixture(name, 8));
-    else if (fixtureType == "Coidak8Channel")
-        allFixtures.push(new RGBFixture(name, 8));
-}
-
-export function updateFixtureChannel(name: string, channel: number, value: number) { 
-    log("Updating fixture " + name + "'s channel " + channel.toString() + " to " + value.toString());    
-    let fixture = findFixtureByName(name);
-    if (channel > 0)
-        if (fixture) fixture.channels[channel-1].value = value;
-    else log("invalid channel number");
+export function createRGBFixture(fixtureType: string) : RGBFixture {
+    log("Creating RGB dmx fixture " + fixtureType.toString());
+    let rgbFixture = new RGBFixture(8, fixtureType);
+    allFixtures.push(rgbFixture);
+    return rgbFixture;
 }
 
 /* Send the updated channel information to the DMX controller */
 export function send() : void {
     log("Sending updated dmx info to controller");
     dmxController.update(universeName, generateDMXJson());
-}
-
-export function findFixtureByName(name: string) : Fixture {
-    for (let i = 0; i < allFixtures.length; i++){
-        let fixture = allFixtures[i];
-        if (fixture.name == name) return fixture;
-    }
-    return null;
 }
 
 export function generateDMXJson() : any {
@@ -138,3 +143,16 @@ export function generateDMXJson() : any {
  * scenes -> patterns -> shows (the user can do all 3 in makecode or
  * just do the actual triggering mechanisms therefore creating a show)
  */
+
+export function hexToRgb(hex: string) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+  }
+
+export function fixturetype(fixture: string): string { 
+    return fixture;
+}

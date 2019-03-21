@@ -90,7 +90,6 @@ export function init(port: RPiPort) {
 
 
 interface IPacket {
-
     kind: recValType,
     serial: number,
     signal: number,
@@ -118,9 +117,11 @@ export function onReciveString(handler: Handler<IHandlerPacket<string>>): void {
 }
 
 export function sendNumber(num: string): void {
+    serial.flush();
     serial.write(num);
 }
 
 export function radioSetGroup(num: number): void {
-    serial.write(num);
+    const str: string = "g" + num
+    serial.write(str);
 }

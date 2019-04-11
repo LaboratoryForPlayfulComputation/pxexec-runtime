@@ -1,8 +1,14 @@
+require('source-map-support').install();
+
 import Fiber = require('fibers');
 import Future = require('fibers/future');
+import { machineIdSync } from 'node-machine-id';
+
 import { log } from './console';
 
 export const env = process.env;
+
+export const machineID: string = machineIdSync();
 
 export const hacks: {
 	wrtc: any
@@ -86,6 +92,8 @@ function atexit(reason: string, ...args: any[]) {
 	}
 
 	exitHandlers.forEach((h) => h());
+
+	process.exit(1);
 }
 
 process.on('exit', () => atexit('EXIT'));

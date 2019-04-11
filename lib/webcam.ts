@@ -31,7 +31,7 @@ export function capture(): Image {
             if (err) {
                 reject(err);
             } else {
-                console.log("Took a webcam shot.")
+                console.info("Took a webcam shot.")
                 resolve(new Image(data as string));
             }
         });

@@ -1,10 +1,12 @@
-require('source-map-support').install();
+import 'source-map-support/register';
 
 import Fiber = require('fibers');
 import Future = require('fibers/future');
 import { machineIdSync } from 'node-machine-id';
 
-import { log } from './console';
+import { error, info } from './console';
+
+export const RUNTIME_BASE: string = __filename.split('/').slice(0, -3).join('/') + '/';
 
 export const env = process.env;
 
@@ -26,7 +28,7 @@ const exitHandlers: Set<() => void> = new Set();
  *  Log the reason and kill the process.
  */
 function catchPromiseRejection(reason: any) {
-	log("Unhandled exception from Event Loop:", reason);
+	error("Unhandled exception from Event Loop:", reason);
 	process.exit(1);
 }
 
@@ -36,6 +38,8 @@ function catchPromiseRejection(reason: any) {
  * @param body The main thread of the program.
  */
 export function main(body: () => void) {
+	info("Starting... ");
+
 	if (!executing) {
 		executing = true;
 		initializers.forEach((init) => init());
@@ -85,10 +89,8 @@ export function _await<T>(task: Promise<T>, catcher?: (reason: any) => PromiseLi
 
 // Set up the exit handlers for the module
 function atexit(reason: string, ...args: any[]) {
-	log("EXIT: " + reason);
-
 	if (reason === 'uncaughtException') {
-		log(args[0].message, args[0].stack);
+		error(args[0].message, args[0].stack);
 	}
 
 	exitHandlers.forEach((h) => h());
@@ -99,3 +101,8 @@ function atexit(reason: string, ...args: any[]) {
 process.on('exit', () => atexit('EXIT'));
 process.on('SIGINT', () => atexit('SIGINT'));
 process.on('uncaughtException', (e) => atexit('uncaughtException', e));
+
+
+onExit(() => {
+	info("Exiting...");
+})

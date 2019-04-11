@@ -11,5 +11,5 @@ _core.main(() => {
     const cell = sheet.readCell("A1");
 
     // tslint:disable-next-line:no-console
-    console.log(cell);
+    console.info(cell);
 });

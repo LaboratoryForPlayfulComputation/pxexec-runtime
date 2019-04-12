@@ -4,8 +4,7 @@ import * as webcam from '../lib/webcam';
 import * as timelapse from '../lib/timelapse';
 
 _core.main(() => {
-    loops.forever(() => {
+    loops.onInterval(60000, () => {
         timelapse.uploadImage(webcam.capture());
-        loops.pause(60000);
     });
 });

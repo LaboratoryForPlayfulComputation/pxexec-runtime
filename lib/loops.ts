@@ -16,3 +16,9 @@ export function forever(h: () => void) {
 	}
 	_detach(() => eternal(h));
 }
+
+export function onInterval(interval: number, h: () => void) {
+	setInterval(() => {
+		_detach(h);
+	}, interval);
+}

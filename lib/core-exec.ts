@@ -2,11 +2,15 @@ import 'source-map-support/register';
 
 import Fiber = require('fibers');
 import Future = require('fibers/future');
+import { machineIdSync } from 'node-machine-id';
+
 import { error, info } from './console';
 
-export const RUNTIME_BASE : string = __filename.split('/').slice(0, -3).join('/') + '/';
+export const RUNTIME_BASE: string = __filename.split('/').slice(0, -3).join('/') + '/';
 
 export const env = process.env;
+
+export const machineID: string = machineIdSync();
 
 export const hacks: {
 	wrtc: any

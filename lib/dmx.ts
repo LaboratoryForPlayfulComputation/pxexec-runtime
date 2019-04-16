@@ -2,7 +2,6 @@ import DMX = require('dmx');
 import { log } from './console';
 import { _await } from './core-exec';
 
-
 let allFixtures  : Array<Fixture> = [];
 let universeName : string = 'pidmx';
 let dmxController : DMX | undefined;

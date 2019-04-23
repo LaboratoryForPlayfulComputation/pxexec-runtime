@@ -2,20 +2,18 @@ import { SignalingClient } from 'dss-client';
 import { URL } from 'url';
 import uuidv4 = require('uuid/v4');
 
-import { _await, _detach, env, hacks } from './core-exec';
+import { _await, _detach, env, hacks, onExit } from './core-exec';
 
-import { log } from './console';
+import { info } from './console';
 
 let client: SignalingClient;
 
 const COMM_NAME = 'comms';
 
-const connections: { [k: string] : RTCDataChannel } = {};
+const connections: { [k: string]: RTCDataChannel } = {};
 
-const onConnectEvents: { [k: string] : Array<() => void> } = {}
-
+const onConnectEvents: { [k: string]: Array<() => void> } = {}
 const onMessageEvents: Array<(p: string, m: string) => void> = [];
-
 const onMessageFromEvents: { [k: string]: Array<(m: string) => void> } = {};
 
 let initialized = false;
@@ -40,10 +38,13 @@ function wireConnEvents(channel: RTCDataChannel, otherID: string): void {
     }
 }
 
-// Really just have to mask this function...
-export function initialize() {
-    return;
-}
+onExit(() => {
+    Object.keys(connections).forEach((k) => {
+        if (connections.hasOwnProperty(k)) {
+            connections[k].close();
+        }
+    });
+})
 
 export function start() {
     _join();
@@ -67,11 +68,13 @@ function _join(id?: string) {
             webRTCOptions: {
                 peerOptions: {
                     iceServers: [
-                        {urls: [
-                            'stuns:stun1.l.google.com:19302',
-                            'stuns:stun2.l.google.com:19302',
-                            'stuns:stun3.l.google.com:19302',
-                            'stuns:stun4.l.google.com:19302']
+                        {
+                            urls: [
+                                'stuns:stun1.l.google.com:19302',
+                                'stuns:stun2.l.google.com:19302',
+                                'stuns:stun3.l.google.com:19302',
+                                'stuns:stun4.l.google.com:19302'
+                            ]
                         }
                     ]
                 }
@@ -80,7 +83,7 @@ function _join(id?: string) {
         client.on('CONN_OPEN', (args) => {
             const channel: RTCDataChannel = args[1];
             const otherID = args[2]
-            log("Connection opened with: " + otherID);
+            info("Connection opened with: " + otherID);
             connections[otherID] = channel;
             wireConnEvents(channel, otherID);
         });
@@ -103,7 +106,7 @@ export function sendString(message: string, peer: string) {
     }
 }
 
-function _registerKeyedHandler(registry: {[k: string] : any}, key: string, handler: any) {
+function _registerKeyedHandler(registry: { [k: string]: any }, key: string, handler: any) {
     let handlers = registry[key];
     if (!handlers) {
         handlers = [];

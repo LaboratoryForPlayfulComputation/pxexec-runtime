@@ -1,5 +1,5 @@
 import { GrovePi } from 'node-grovepi';
-import { _detach } from './core-exec';
+import { _detach, onExit, onInit } from './core-exec';
 import * as loops from './loops';
 
 // Type aliases
@@ -64,13 +64,29 @@ const typeToConstructor: Map<PortType, (port: number) => Sensor> = new Map([
     [PortType.TEMPERATURE, (port: number) => new TemperatureAnalogSensor(port)]
 ]);
 
-export function initialize(): void {
+onInit(() => {
     board = new GrovePi.board();
     board.init();
 
     configuredPorts = {};
-}
+});
 
+onExit(() => {
+    configuredPorts = {};
+
+    board.close();
+})
+
+/**
+ * Configure a sensor on a given port. If a sensor is already configured on that
+ * port, return it. If a sensor is requested for a port, where a sensor of a
+ * different type is already defined, an Error is thrown.
+ *
+ * @param port The port number on the GrovePi board to use.
+ * @param type The Type of the sensor to configure on the given port number
+ * 
+ * @throws If a port is requested twice for multiple types.
+ */
 function createOrGetSensor(port: number, type: PortType): Sensor {
     const storedPort = configuredPorts[port];
     if (storedPort === undefined) {

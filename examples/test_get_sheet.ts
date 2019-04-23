@@ -3,8 +3,6 @@ import * as _core from '../lib/core-exec';
 import * as sheets from '../lib/sheets';
 
 _core.main(() => {
-    sheets.initialize();
-
     const sheet = sheets.getSheet("1FcfEth7aMtUG1MbU9h_uEIoaHMS9tQq0zJryIAroZpE");
     // sheet.clear();
 
@@ -13,5 +11,5 @@ _core.main(() => {
     const cell = sheet.readCell("A1");
 
     // tslint:disable-next-line:no-console
-    console.log(cell);
+    console.info(cell);
 });

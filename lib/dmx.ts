@@ -2,9 +2,9 @@ import DMX = require('dmx');
 import * as console from './console';
 import { _await } from './core-exec';
 
-let allFixtures  : Array<Fixture> = [];
-let universeName : string = 'pidmx';
-let dmxController : DMX | undefined;
+export let allFixtures  : Array<Fixture> = [];
+export let universeName : string = 'pidmx';
+export let dmxController : DMX | undefined;
 
 export enum RGBFixtureType {
     Baisun8ch,

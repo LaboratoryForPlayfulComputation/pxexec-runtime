@@ -12,11 +12,7 @@ export const env = process.env;
 
 export const machineID: string = machineIdSync();
 
-export const hacks: {
-	wrtc: any
-} = {
-	wrtc: undefined,
-}
+export const hacks: { wrtc: any, nodedmx: any } = { wrtc: undefined, nodedmx: undefined}
 
 let executing: boolean = false;
 const initializers: Set<() => void> = new Set();

@@ -17,6 +17,8 @@
   "devDependencies": {
     "@types/node": "^10.10.1",
     "@types/node-fibers": "0.0.28",
+    "@types/request": "^2.48.1",
+    "@types/onoff": "^3.2.1",
     "@types/uuid": "^3.4.4",
     "tslint-config-prettier": "^1.15.0"
   },
@@ -27,6 +29,14 @@
     "googleapis": "^37.2.0",
     "googleapis-common": "^0.7.2",
     "node-grovepi": "^2.2.2",
+<<<<<<< HEAD
+=======
+    "node-machine-id": "^1.1.10",
+    "node-webcam": "^0.4.6",
+    "onoff": "^3.2.2",
+    "request": "^2.88.0",
+    "source-map-support": "^0.5.12",
+>>>>>>> 6fea47703b76b42a570ec181bb4ba08d44b065f7
     "uuid": "^3.3.2"
   }
 }

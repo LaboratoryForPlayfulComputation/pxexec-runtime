@@ -3,7 +3,7 @@ import Wemo = require('wemo-client');
 import * as core from './core-exec';
 import * as console from './console';
 
-type ClientResolver = (value? : WemoClient | PromiseLike<WemoClient>) => void;
+type ClientResolver = (value?: WemoClient | PromiseLike<WemoClient>) => void;
 
 const CLIENTS: { [k: string]: WemoClient } = {};
 const RESOLVER_QUEUE: { [k: string]: Array<ClientResolver> } = {};
@@ -59,23 +59,27 @@ function discover(cycles?: number) {
     }
 }
 
-function requireClient(serial: string) : Promise<WemoClient> {
+function requireClient(serial: string, timeout?: number): Promise<WemoClient> {
     return new Promise((resolve, reject) => {
         if (CLIENTS[serial]) {
             // Client already exists, immediately resolve
             resolve(CLIENTS[serial]);
         } else {
             // Client does not exist, configure a resolver and set a timeout
-            const cancellationToken = setTimeout(() => {
-                reject("timed out");
-            }, BLOCK_TIMEOUT);
-
+            let cancellationToken: NodeJS.Timeout | undefined = undefined;
+            if (timeout) {
+                cancellationToken = setTimeout(() => {
+                    reject("timed out");
+                }, timeout);
+            }
             if (!(RESOLVER_QUEUE[serial])) {
                 RESOLVER_QUEUE[serial] = [];
             }
 
             RESOLVER_QUEUE[serial].push((v) => {
-                clearTimeout(cancellationToken);
+                if (cancellationToken) {
+                    clearTimeout(cancellationToken);
+                }
                 resolve(v);
             })
         }
@@ -99,7 +103,7 @@ export class WemoDevice {
     }
 
     setSwitchState(newState: WemoSwitchState) {
-        core._await(requireClient(this.serial).then((client) => {
+        core._await(requireClient(this.serial, BLOCK_TIMEOUT).then((client) => {
             return new Promise((resolve, reject) => {
                 client.setBinaryState(newState, (err, _) => {
                     if (err) {
@@ -111,4 +115,16 @@ export class WemoDevice {
             })
         }))
     }
+}
+
+export function onConnect(serial: string, cb: (client: WemoDevice) => void) {
+    requireClient(serial).then((_) => {
+        core._detach(() => {
+            cb(new WemoDevice(serial));
+        })
+    })
+}
+
+export function bySerialNumber(serial: string): WemoDevice {
+    return new WemoDevice(serial);
 }

@@ -1,10 +1,28 @@
 import DMX = require('dmx');
+import * as core from './core-exec';
 import * as console from './console';
 import { _await } from './core-exec';
 
 export let allFixtures  : Array<Fixture> = [];
 export let universeName : string = 'pidmx';
 export let dmxController : DMX | undefined;
+
+core.onInit(() => {
+    console.info("initializing shit");
+    
+    dmxController = new DMX();
+
+    if (dmxController) {
+        // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
+        //universe = dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
+        dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
+        //const universe = dmx.addUniverse(universeName, 'null');
+        console.info("initialized dmx universe");
+    } else {
+        console.info("unable to initialize dmx universe");
+    }
+    return;
+});
 
 export enum RGBFixtureType {
     Baisun8ch,
@@ -92,20 +110,6 @@ export class Channel {
     }
 }
 
-export function initialize() {
-    dmxController = new DMX();
-
-    if (dmxController) {
-        // TO DO: make the set up of the DMX USB more dynamic so different ports & devices can be used
-        //universe = dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
-        dmxController.addUniverse(universeName, 'dmxking-ultra-dmx-pro', '/dev/ttyUSB0');
-        //const universe = dmx.addUniverse(universeName, 'null');
-        console.info("initialized dmx universe");
-    } else {
-        console.info("unable to initialize dmx universe");
-    }
-    return;
-}
 
 /*
 /* Method to create new DMX fixture

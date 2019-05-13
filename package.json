@@ -36,7 +36,13 @@
     "onoff": "^3.2.2",
     "request": "^2.88.0",
     "source-map-support": "^0.5.12",
+<<<<<<< HEAD
 >>>>>>> 6fea47703b76b42a570ec181bb4ba08d44b065f7
     "uuid": "^3.3.2"
+=======
+    "strict-event-emitter-types": "^2.0.0",
+    "uuid": "^3.3.2",
+    "wemo-client": "^0.15.0"
+>>>>>>> 8ec65f809d7b097f60eb02e181a5defbb57179e1
   }
 }

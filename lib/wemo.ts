@@ -2,11 +2,15 @@ import Wemo = require('wemo-client');
 
 import * as core from './core-exec';
 import * as console from './console';
+import StrictEventEmitter from 'strict-event-emitter-types/types/src';
 
-type ClientResolver = (value?: WemoClient | PromiseLike<WemoClient>) => void;
+type Client = StrictEventEmitter<WemoClient, WemoClientEvents>;
+type ClientResolver = (value?: Client | PromiseLike<Client>) => void;
+type ClientBinder = (serial: string) => void;
 
-const CLIENTS: { [k: string]: WemoClient } = {};
+const CLIENTS: { [k: string]: Client } = {};
 const RESOLVER_QUEUE: { [k: string]: Array<ClientResolver> } = {};
+const NAME_BINDERS: { [k: string]: Array<ClientBinder> } = {};
 
 // How many times to run discover() on launch.
 const INIT_CYCLES = 3;
@@ -36,6 +40,12 @@ function discover(cycles?: number) {
                 })
             }
 
+            if (NAME_BINDERS[deviceInfo.friendlyName]) {
+                NAME_BINDERS[deviceInfo.friendlyName].forEach((handle) => {
+                    handle(serial);
+                });
+            }
+
             client.on('error', (err) => {
                 console.debug(`Lost wemo (${deviceInfo.friendlyName}) from: `, err.code);
                 if (CLIENTS[serial]) {
@@ -59,7 +69,7 @@ function discover(cycles?: number) {
     }
 }
 
-function requireClient(serial: string, timeout?: number): Promise<WemoClient> {
+function requireClient(serial: string, timeout?: number): Promise<Client> {
     return new Promise((resolve, reject) => {
         if (CLIENTS[serial]) {
             // Client already exists, immediately resolve
@@ -86,6 +96,14 @@ function requireClient(serial: string, timeout?: number): Promise<WemoClient> {
     });
 }
 
+function setNameCallback(name: string, cb: ClientBinder) : void  {
+    if (!(NAME_BINDERS[name])) {
+        NAME_BINDERS[name] = [];
+    }
+
+    NAME_BINDERS[name].push(cb);
+}
+
 core.onInit(() => {
     discover(INIT_CYCLES);
 })
@@ -102,6 +120,20 @@ export class WemoDevice {
         this.serial = serial;
     }
 
+    getSwitchState() : WemoSwitchState {
+        return core._await(requireClient(this.serial, BLOCK_TIMEOUT).then((client) => {
+            return new Promise((resolve, reject) => {
+                client.getBinaryState((err, state) => {
+                    if (err) {
+                        reject("getBinaryState failed: " + err);
+                    } else {
+                        resolve(state as WemoSwitchState);
+                    }
+                })
+            });
+        }));
+    }
+
     setSwitchState(newState: WemoSwitchState) {
         core._await(requireClient(this.serial, BLOCK_TIMEOUT).then((client) => {
             return new Promise((resolve, reject) => {
@@ -111,10 +143,38 @@ export class WemoDevice {
                     } else {
                         resolve()
                     }
-                })
-            })
-        }))
+                });
+            });
+        }));
     }
+
+    onStateChange(cb: (newState: WemoSwitchState) => void) {
+        requireClient(this.serial, BLOCK_TIMEOUT).then((client) => {
+            client.on('binaryState', (value: string) => {
+                core._detach(() => cb(value as WemoSwitchState));
+            });
+        });
+    }
+
+    getInstantPower() : number {
+        return core._await(requireClient(this.serial, BLOCK_TIMEOUT).then((client) => {
+            return new Promise<number>((resolve, reject) => {
+                client.getInsightParams((err, _1, instantPower, _2) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(parseInt(instantPower));
+                    }
+                });
+            });
+        }));
+    }
+}
+
+export function onConnectToName(name: string, cb: (client: WemoDevice) => void) {
+    setNameCallback(name, (serial) => {
+        core._detach(() => cb(new WemoDevice(serial)))
+    })
 }
 
 export function onConnect(serial: string, cb: (client: WemoDevice) => void) {
